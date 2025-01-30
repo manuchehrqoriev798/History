@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Faculty History</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Faculty History</h1>
+        
+        <div id="admin-controls" style="display: none;">
+            <input type="text" id="yearInput" placeholder="Year">
+            <textarea id="infoInput" placeholder="Year Information"></textarea>
+            <button onclick="addYear()">Add Year</button>
+        </div>
+
+        <div id="years-list"></div>
+    </div>
+
+    <script src="firebase-config.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

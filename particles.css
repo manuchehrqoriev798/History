@@ -1,0 +1,28 @@
+canvas {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.content-wrapper {
+  position: relative;
+  z-index: 1;
+}
+
+/* Ensure other components don't hide the particles */
+.app {
+  position: relative;
+  min-height: 100vh;
+  background: transparent;
+}
+
+/* Make backgrounds slightly transparent */
+.navbar-dashboard,
+.navbar-home,
+.panel {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+}
