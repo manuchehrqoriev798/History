@@ -2,25 +2,51 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="data:,">
     <title>Faculty History</title>
-    <link rel="stylesheet" href="styles.css">
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:wght@400;600&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="css/theme.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Faculty History</h1>
-        
-        <div id="admin-controls" style="display: none;">
-            <input type="text" id="yearInput" placeholder="Year">
-            <textarea id="infoInput" placeholder="Year Information"></textarea>
-            <button onclick="addYear()">Add Year</button>
+    <!-- Navigation Bar -->
+    <nav class="navbar paper-effect">
+        <div class="nav-brand">Faculty History</div>
+        <div class="nav-links">
+            <a href="html/login.html" class="nav-link">Login</a>
+            <a href="html/signup.html" class="nav-link">Sign Up</a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        <!-- Timeline Navigation -->
+        <div class="timeline-nav paper-effect">
+            <h2 class="decorative-border">Historical Timeline</h2>
+            <div class="years-list" id="yearsList">
+                <!-- Years will be populated dynamically -->
+            </div>
         </div>
 
-        <div id="years-list"></div>
+        <!-- Content Area -->
+        <div class="content-area paper-effect">
+            <div id="yearContent" class="year-content">
+                <div class="content-placeholder">Select a year to view its history</div>
+            </div>
+        </div>
     </div>
 
-    <script src="firebase-config.js"></script>
-    <script src="app.js"></script>
+    <!-- Scripts -->
+    <script type="module" src="js/index.js"></script>
+    <script src="js/particles.js"></script>
+    <script>
+        // Initialize particle system
+        document.addEventListener('DOMContentLoaded', () => {
+            new ParticleSystem();
+        });
+    </script>
 </body>
 </html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faculty History - User</title>
+    <link rel="stylesheet" href="../css/user.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Faculty History Timeline</h1>
+            <button id="logoutBtn" class="logout-btn">Logout</button>
+        </header>
+
+        <div class="user-content">
+            <div class="year-form">
+                <h2>Manage Your Year Entry</h2>
+                <form id="yearForm">
+                    <div class="input-group">
+                        <input type="number" id="yearInput" placeholder="Year" required>
+                    </div>
+                    <div class="input-group">
+                        <textarea id="descriptionInput" placeholder="Historical Description" required></textarea>
+                    </div>
+                    <button type="submit" id="submitBtn">Save Entry</button>
+                </form>
+            </div>
+            
+            <div id="currentEntry" class="current-entry">
+                <!-- User's current entry will be displayed here -->
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="../js/user.js"></script>
+</body>
+</html> 

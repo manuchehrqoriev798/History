@@ -1,0 +1,3 @@
+Here i want to have like this platform for any user in the index.html page there will be shown the years and the infos about the year in the form of navigation and blocks. 
+
+for users if they create account and login 

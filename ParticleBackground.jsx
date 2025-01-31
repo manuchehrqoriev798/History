@@ -4,7 +4,7 @@ const ParticleBackground = () => {
   const canvasRef = useRef(null);
 
   const config = {
-    particleCount: 50,  // Reduced for testing
+    particleCount: 50,  // Reduced for testinga
     connectionDistance: 150,
     particleSize: {
       min: 3,
@@ -130,3 +130,5 @@ const ParticleBackground = () => {
 };
 
 export default ParticleBackground; 
+
+
