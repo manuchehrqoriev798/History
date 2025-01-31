@@ -4,24 +4,37 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Faculty History - Login</title>
+    <link rel="stylesheet" href="../css/theme.css">
+    <link rel="stylesheet" href="../css/particles.css">
     <link rel="stylesheet" href="../css/login.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="login-container">
         <div class="login-box">
-            <h2>Login</h2>
+            <div class="login-header">
+                <h2>Welcome Back</h2>
+                <p class="subtitle">Please enter your credentials to continue</p>
+            </div>
             <form id="loginForm">
                 <div class="input-group">
-                    <input type="text" id="name" placeholder="Name" required>
+                    <label for="name">Username</label>
+                    <input type="text" id="name" required>
                 </div>
                 <div class="input-group">
-                    <input type="password" id="password" placeholder="Password" required>
+                    <label for="password">Password</label>
+                    <input type="password" id="password" required>
                 </div>
-                <button type="submit" id="loginButton">Login</button>
+                <button type="submit" id="loginButton">
+                    <span>Sign In</span>
+                </button>
             </form>
             <p id="errorMessage" class="error-message"></p>
             <p class="switch-form">
-                Don't have an account? <a href="signup.html">Sign up here</a>
+                Don't have an account? <a href="signup.html">Create account</a>
+            </p>
+            <p class="home-button">
+                <a href="../index.html">← Back to Home</a>
             </p>
         </div>
     </div>

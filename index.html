@@ -8,8 +8,9 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:wght@400;600&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
     <!-- Stylesheets -->
-    <link rel="stylesheet" href="css/index.css">
     <link rel="stylesheet" href="css/theme.css">
+    <link rel="stylesheet" href="css/particles.css">
+    <link rel="stylesheet" href="css/index.css">
 </head>
 <body>
     <!-- Navigation Bar -->
@@ -41,8 +42,10 @@
 
     <!-- Scripts -->
     <script type="module" src="js/index.js"></script>
-    <script src="js/particles.js"></script>
-    <script>
+    <script type="module" src="js/particles.js"></script>
+    <script type="module">
+        import { ParticleSystem } from './js/particles.js';
+        
         // Initialize particle system
         document.addEventListener('DOMContentLoaded', () => {
             new ParticleSystem();

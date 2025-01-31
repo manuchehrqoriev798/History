@@ -13,12 +13,13 @@ body {
 
 /* Navbar Styles */
 .navbar {
-    background: #007bff;
+    background: var(--primary-color);
     padding: 1rem 2rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    color: var(--bg-secondary);
 }
 
 .nav-brand {
@@ -33,15 +34,16 @@ body {
 }
 
 .nav-link {
-    color: white;
+    color: var(--bg-secondary);
     text-decoration: none;
     padding: 0.5rem 1rem;
     border-radius: 4px;
     transition: background 0.3s;
+    background: var(--secondary-color);
 }
 
 .nav-link:hover {
-    background: rgba(255,255,255,0.1);
+    background: var(--button-hover);
 }
 
 /* Main Container */
@@ -76,26 +78,27 @@ body {
 
 .year-button {
     padding: 0.75rem 1rem;
-    background: #f8f9fa;
-    border: 1px solid #dee2e6;
+    background: var(--card-background);
+    border: 1px solid var(--secondary-color);
     border-radius: 4px;
     cursor: pointer;
     transition: all 0.3s;
+    color: var(--text-primary);
 }
 
 .year-button:hover {
-    background: #e9ecef;
+    background: var(--secondary-color);
+    color: var(--bg-secondary);
 }
 
 .year-button.active {
-    background: #007bff;
-    color: white;
-    border-color: #007bff;
+    background: var(--secondary-color);
+    color: var(--bg-secondary);
 }
 
 /* Content Area */
 .content-area {
-    background: white;
+    background: var(--card-background);
     padding: 2rem;
     border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
@@ -174,4 +177,22 @@ button[type="submit"]:hover {
     .nav-link {
         padding: 0.4rem 0.8rem;
     }
+}
+
+/* Content Styles */
+.historical-text {
+    color: var(--text-primary);
+    font-family: 'Crimson Text', serif;
+    line-height: 1.8;
+}
+
+.entry-author {
+    color: var(--text-light);
+}
+
+/* Paper effect */
+.paper-effect {
+    background: var(--card-background);
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(139, 69, 19, 0.1);
 }

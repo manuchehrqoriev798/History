@@ -4,14 +4,9 @@ import { ref, get, query, orderByChild } from 'https://www.gstatic.com/firebasej
 // DOM Elements
 const yearsList = document.getElementById('yearsList');
 const yearContent = document.getElementById('yearContent');
-const uploadForm = document.getElementById('uploadForm');
 
 // Check if user is logged in
 const userRole = sessionStorage.getItem('userRole');
-if (userRole) {
-    // Show upload form only for logged-in users
-    uploadForm.style.display = 'block';
-}
 
 // Load all years from both users and admin
 async function loadYears() {

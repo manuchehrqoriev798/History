@@ -1,12 +1,34 @@
 /* Historical Theme Colors */
 :root {
-    --primary-color: #8B4513;  /* Saddle Brown - historical wood color */
-    --secondary-color: #DEB887;  /* Burly Wood - parchment color */
-    --accent-color: #DAA520;  /* Golden Rod - gold accents */
-    --text-color: #2F4F4F;  /* Dark Slate Gray - aged ink color */
-    --background-color: #FFF8DC;  /* Corn Silk - aged paper color */
-    --shadow-color: rgba(0, 0, 0, 0.15);
-  }
+    /* Main colors - adjusted for better contrast */
+    --primary-color: #1a0f0a;      /* Darker brown */
+    --secondary-color: #8b4513;    /* Kept the same */
+    --accent-color: #c17f3e;       /* Darker tan for better contrast */
+    
+    /* Background colors - adjusted for better readability */
+    --bg-primary: #faf7f0;         /* Slightly warmer background */
+    --bg-secondary: #ffffff;       /* Pure white for better contrast */
+    --card-background: #ffffff;    /* Pure white for cards */
+    
+    /* Text colors - improved contrast */
+    --text-primary: #1a0f0a;       /* Darker for better readability */
+    --text-secondary: #433128;     /* Darker brown */
+    --text-light: #6b5147;        /* Darker for better contrast */
+    
+    /* Interactive elements */
+    --button-primary: #8b4513;     /* Saddle brown for buttons */
+    --button-hover: #6b3410;       /* Darker brown for hover states */
+    --link-color: #5c3317;         /* Rich brown for links */
+    --error-color: #a83232;        /* Dark red for errors */
+    
+    /* Added new variables */
+    --font-size-base: 16px;
+    --font-size-large: 18px;
+    --line-height: 1.6;
+    --spacing-unit: 1rem;
+    --border-radius: 8px;
+    --transition-speed: 0.3s;
+}
   
   /* Global Styles */
   body {

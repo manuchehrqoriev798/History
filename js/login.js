@@ -1,6 +1,9 @@
 import { db, auth } from './firebase-config.js';
 import { ref, get } from 'https://www.gstatic.com/firebasejs/9.1.3/firebase-database.js';
 import { signInWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/9.1.3/firebase-auth.js';
+import { ParticleSystem } from './particles.js';
+
+const particleSystem = new ParticleSystem();  // Initialize particle system
 
 const loginForm = document.getElementById('loginForm');
 const errorMessage = document.getElementById('errorMessage');

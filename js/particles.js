@@ -1,25 +1,28 @@
-class ParticleSystem {
+export class ParticleSystem {
   constructor() {
     this.canvas = document.createElement('canvas');
     this.canvas.id = 'particles-bg';
     document.body.prepend(this.canvas);
     this.ctx = this.canvas.getContext('2d');
     this.particles = [];
-    this.particleCount = 80; // Increased for more connections
+    this.particleCount = 100;
     this.mouse = { x: null, y: null, radius: 150 };
     
-    // Enhanced configuration
     this.config = {
-      particleColor: 'rgba(139, 69, 19, 0.4)',
-      connectionColor: 'rgba(139, 69, 19, 0.12)',
-      particleSize: { min: 2, max: 5 },
-      speed: { min: 0.3, max: 0.8 }, // Increased speed for more dynamic movement
-      connectionDistance: 150, // Increased connection distance
-      maxConnections: 3, // Reduced max connections for clearer visuals
-      connectionWidth: 0.8,
-      pulseSpeed: 0.01,
-      repelForce: 0.1, // Force to push particles apart when too close
-      minDistance: 30 // Minimum distance before particles repel
+      particleColor: 'rgba(139, 69, 19, 0.6)',
+      connectionColor: 'rgba(139, 69, 19, 0.5)',
+      particleSize: { min: 3, max: 6 },
+      speed: { min: 0.2, max: 0.4 }, // Increased speed to make movement visible
+      connectionDistance: 180,
+      maxConnections: 6,
+      connectionWidth: 2.2,
+      pulseSpeed: 0.005,
+      repelForce: 0.04,
+      minDistance: 35,
+      particleCount: 100,
+      wanderStrength: 0.05, // Increased for more noticeable movement
+      flowFieldScale: 0.005, // Adjusted for better flow
+      flowFieldStrength: 0.1 // Increased for more defined movement
     };
 
     this.init();
@@ -51,8 +54,9 @@ class ParticleSystem {
           this.config.particleSize.min,
         vx: (Math.random() - 0.5) * this.config.speed.max,
         vy: (Math.random() - 0.5) * this.config.speed.max,
-        pulse: Math.random() * Math.PI * 2, // Random starting phase
-        connections: 0 // Track number of connections
+        angle: Math.random() * Math.PI * 2,
+        pulse: Math.random() * Math.PI * 2,
+        connections: 0
       });
     }
   }
@@ -60,63 +64,30 @@ class ParticleSystem {
   animate() {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     
-    // Update particle positions and handle interactions
+    // Update particle positions
+    this.particles.forEach(p => {
+      // Update position
+      p.x += p.vx;
+      p.y += p.vy;
+      
+      // Bounce off edges
+      if (p.x < 0 || p.x > this.canvas.width) p.vx *= -1;
+      if (p.y < 0 || p.y > this.canvas.height) p.vy *= -1;
+      
+      // Gradually change direction
+      p.angle += (Math.random() - 0.5) * 0.1;
+      p.vx = Math.cos(p.angle) * this.config.speed.min;
+      p.vy = Math.sin(p.angle) * this.config.speed.min;
+      
+      // Keep particles within bounds
+      p.x = Math.max(0, Math.min(this.canvas.width, p.x));
+      p.y = Math.max(0, Math.min(this.canvas.height, p.y));
+    });
+
+    // Draw connections
     for (let i = 0; i < this.particles.length; i++) {
       const p1 = this.particles[i];
       p1.connections = 0;
-      
-      // Particle interaction with others
-      for (let j = i + 1; j < this.particles.length; j++) {
-        const p2 = this.particles[j];
-        const dx = p2.x - p1.x;
-        const dy = p2.y - p1.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-
-        // Repel if too close
-        if (distance < this.config.minDistance) {
-          const angle = Math.atan2(dy, dx);
-          const force = (this.config.minDistance - distance) * this.config.repelForce;
-          
-          p1.vx -= Math.cos(angle) * force;
-          p1.vy -= Math.sin(angle) * force;
-          p2.vx += Math.cos(angle) * force;
-          p2.vy += Math.sin(angle) * force;
-        }
-      }
-
-      // Update position
-      p1.x += p1.vx;
-      p1.y += p1.vy;
-      
-      // Apply friction
-      p1.vx *= 0.99;
-      p1.vy *= 0.99;
-      
-      // Bounce off edges
-      if (p1.x < 0 || p1.x > this.canvas.width) {
-        p1.vx *= -1;
-        p1.x = p1.x < 0 ? 0 : this.canvas.width;
-      }
-      if (p1.y < 0 || p1.y > this.canvas.height) {
-        p1.vy *= -1;
-        p1.y = p1.y < 0 ? 0 : this.canvas.height;
-      }
-
-      // Pulse size
-      p1.pulse += this.config.pulseSpeed;
-      p1.radius = p1.baseRadius + Math.sin(p1.pulse) * 0.5;
-    }
-
-    // Draw particles and connections
-    this.drawParticlesAndConnections();
-    
-    requestAnimationFrame(() => this.animate());
-  }
-
-  drawParticlesAndConnections() {
-    // First draw all connections
-    for (let i = 0; i < this.particles.length; i++) {
-      const p1 = this.particles[i];
       
       for (let j = i + 1; j < this.particles.length; j++) {
         const p2 = this.particles[j];
@@ -131,10 +102,9 @@ class ParticleSystem {
           p1.connections++;
           p2.connections++;
           
-          // Calculate opacity based on distance
           const opacity = Math.pow(1 - distance / this.config.connectionDistance, 2);
           this.ctx.beginPath();
-          this.ctx.strokeStyle = this.config.connectionColor.replace('0.12', opacity * 0.15);
+          this.ctx.strokeStyle = this.config.connectionColor.replace('0.5', opacity * 0.5);
           this.ctx.lineWidth = this.config.connectionWidth;
           this.ctx.moveTo(p1.x, p1.y);
           this.ctx.lineTo(p2.x, p2.y);
@@ -143,29 +113,15 @@ class ParticleSystem {
       }
     }
 
-    // Then draw all particles on top
+    // Draw particles
     this.particles.forEach(p => {
       this.ctx.beginPath();
       this.ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
       this.ctx.fillStyle = this.config.particleColor;
       this.ctx.fill();
     });
-
-    // Handle mouse interactions
-    if (this.mouse.x !== null && this.mouse.y !== null) {
-      this.particles.forEach(p => {
-        const dx = p.x - this.mouse.x;
-        const dy = p.y - this.mouse.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        
-        if (distance < this.mouse.radius) {
-          const force = (this.mouse.radius - distance) / this.mouse.radius;
-          const angle = Math.atan2(dy, dx);
-          p.vx += Math.cos(angle) * force * 0.5;
-          p.vy += Math.sin(angle) * force * 0.5;
-        }
-      });
-    }
+    
+    requestAnimationFrame(() => this.animate());
   }
 
   handleMouseMove() {

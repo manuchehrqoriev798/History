@@ -9,25 +9,31 @@ body {
     font-family: 'Arial', sans-serif;
     background: #f5f5f5;
     line-height: 1.6;
+    font-size: var(--font-size-base);
 }
 
 .container {
-    max-width: 1200px;
+    max-width: 1000px;
     margin: 0 auto;
-    padding: 20px;
+    padding: var(--spacing-unit);
 }
 
 /* Header */
 header {
+    background: var(--card-background);
+    padding: 20px 30px;
+    border-radius: 12px;
+    margin-bottom: 30px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px 0;
-    margin-bottom: 30px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
 }
 
-h1 {
-    color: #333;
+h1, h2, h3 {
+    color: var(--text-primary);
+    margin-bottom: calc(var(--spacing-unit) * 0.75);
+    font-family: 'Playfair Display', serif;
 }
 
 .logout-btn {
@@ -45,28 +51,29 @@ h1 {
 
 /* Add Year Form */
 .add-year-form {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    background: var(--card-background);
+    padding: 24px;
+    border-radius: 12px;
     margin-bottom: 30px;
 }
 
 .input-group {
-    margin-bottom: 15px;
+    margin-bottom: var(--spacing-unit);
 }
 
 input, textarea {
-    width: 100%;
-    padding: 10px;
+    font-size: var(--font-size-base);
+    padding: 12px 16px;
     border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 16px;
+    border-radius: var(--border-radius);
+    width: 100%;
+    transition: border-color var(--transition-speed);
 }
 
-textarea {
-    min-height: 100px;
-    resize: vertical;
+input:focus, textarea:focus {
+    border-color: var(--accent-color);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(193, 127, 62, 0.2);
 }
 
 button[type="submit"] {
@@ -90,11 +97,18 @@ button[type="submit"]:hover {
 }
 
 .year-item {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    margin-bottom: 15px;
+    background: var(--card-background);
+    padding: var(--spacing-unit) calc(var(--spacing-unit) * 1.5);
+    margin-bottom: var(--spacing-unit);
+    border-radius: var(--border-radius);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    transition: all var(--transition-speed);
+    border: 1px solid rgba(139, 69, 19, 0.2);
+}
+
+.year-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
 }
 
 .year-header {
@@ -104,17 +118,29 @@ button[type="submit"]:hover {
     margin-bottom: 10px;
 }
 
-.delete-btn {
-    padding: 5px 10px;
-    background: #dc3545;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
+.year-controls {
+    display: flex;
+    gap: 10px;
 }
 
-.delete-btn:hover {
-    background: #c82333;
+.edit-btn, .delete-btn {
+    padding: 8px 16px;
+    border-radius: var(--border-radius);
+    font-weight: 500;
+}
+
+.edit-btn {
+    background: var(--secondary-color);
+    color: var(--bg-secondary);
+}
+
+.delete-btn {
+    background: var(--error-color);
+    color: var(--bg-secondary);
+}
+
+.year-author {
+    color: var(--text-light);
 }
 
 /* Responsive Design */
@@ -128,4 +154,14 @@ button[type="submit"]:hover {
         text-align: center;
         gap: 15px;
     }
+}
+
+/* Improved button styling */
+.button {
+    padding: 12px 24px;
+    border-radius: var(--border-radius);
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    transition: all var(--transition-speed);
+    cursor: pointer;
 }

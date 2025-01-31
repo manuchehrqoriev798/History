@@ -4,27 +4,41 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Faculty History - Sign Up</title>
+    <link rel="stylesheet" href="../css/theme.css">
+    <link rel="stylesheet" href="../css/particles.css">
     <link rel="stylesheet" href="../css/login.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="login-container">
         <div class="login-box">
-            <h2>Create Account</h2>
+            <div class="login-header">
+                <h2>Create Account</h2>
+                <p class="subtitle">Please fill in your information to register</p>
+            </div>
             <form id="signupForm" autocomplete="on">
                 <div class="input-group">
-                    <input type="text" id="name" name="username" autocomplete="username" placeholder="Name" required>
+                    <label for="name">Username</label>
+                    <input type="text" id="name" name="username" autocomplete="username" required>
                 </div>
                 <div class="input-group">
-                    <input type="text" id="loginCode" name="loginCode" autocomplete="off" placeholder="Login Code" required>
+                    <label for="loginCode">Login Code</label>
+                    <input type="text" id="loginCode" name="loginCode" autocomplete="off" required>
                 </div>
                 <div class="input-group">
-                    <input type="password" id="password" name="password" autocomplete="new-password" placeholder="Password" required>
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" autocomplete="new-password" required>
                 </div>
-                <button type="submit">Sign Up</button>
+                <button type="submit">
+                    <span>Sign Up</span>
+                </button>
             </form>
             <p id="errorMessage" class="error-message"></p>
             <p class="switch-form">
                 Already have an account? <a href="login.html">Login here</a>
+            </p>
+            <p class="home-button">
+                <a href="../index.html">← Back to Home</a>
             </p>
         </div>
     </div>

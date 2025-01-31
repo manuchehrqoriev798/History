@@ -73,7 +73,17 @@ yearForm.addEventListener('submit', async (e) => {
         });
         
         displayCurrentEntry({ year, description });
-        alert('Entry saved successfully!');
+        
+        // Replace alert with a temporary success message
+        const successMessage = document.createElement('div');
+        successMessage.className = 'success-message';
+        successMessage.textContent = 'Entry saved successfully!';
+        yearForm.insertAdjacentElement('beforeend', successMessage);
+        
+        // Remove the message after 3 seconds
+        setTimeout(() => {
+            successMessage.remove();
+        }, 3000);
     } catch (error) {
         console.error('Error saving entry:', error);
         alert('Error saving entry. Please try again.');
