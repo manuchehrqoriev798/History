@@ -4,11 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Faculty History - Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:wght@400;600&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/theme.css">
+    <link rel="stylesheet" href="../css/particles.css">
     <link rel="stylesheet" href="../css/admin.css">
 </head>
 <body>
     <div class="container">
-        <header>
+        <header class="paper-effect">
             <h1>Faculty History Administration</h1>
             <div class="header-buttons">
                 <a href="../index.html" class="home-btn">Home</a>
@@ -16,7 +19,7 @@
             </div>
         </header>
         
-        <div class="add-year-form">
+        <div class="add-year-form paper-effect decorative-border">
             <h2>Add New Historical Entry</h2>
             <form id="addYearForm">
                 <div class="input-group">
@@ -25,16 +28,21 @@
                 <div class="input-group">
                     <textarea id="descriptionInput" placeholder="Historical Description" required></textarea>
                 </div>
-                <button type="submit">Add Entry</button>
+                <button type="submit" class="submit-btn">Add Entry</button>
             </form>
         </div>
 
-        <div class="timeline-container">
+        <div class="timeline-container paper-effect">
             <h2>Historical Timeline</h2>
             <div id="yearsList" class="years-list"></div>
         </div>
     </div>
 
+    <script type="module" src="../js/particles.js"></script>
+    <script type="module">
+        import { ParticleSystem } from '../js/particles.js';
+        new ParticleSystem();
+    </script>
     <script type="module" src="../js/admin.js"></script>
 </body>
 </html> 

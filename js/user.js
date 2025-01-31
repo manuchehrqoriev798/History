@@ -11,8 +11,19 @@ const userName = sessionStorage.getItem('userName');
 const yearForm = document.getElementById('yearForm');
 const currentEntry = document.getElementById('currentEntry');
 
-// Load user's entry
+// Show loading spinner
+function showLoading(element) {
+    element.innerHTML = `
+        <div class="loading-spinner">
+            <div class="loading-text">Loading your entry...</div>
+        </div>
+    `;
+}
+
+// Load user's entry with loading state
 async function loadUserEntry() {
+    showLoading(currentEntry);
+    
     try {
         // Ensure user is authenticated
         if (!auth.currentUser) {
@@ -22,25 +33,41 @@ async function loadUserEntry() {
         const userEntryRef = ref(db, `userEntries/${auth.currentUser.uid}`);
         const snapshot = await get(userEntryRef);
         
+        // Add a small delay for smooth transition
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
         if (snapshot.exists()) {
             const data = snapshot.val();
             document.getElementById('yearInput').value = data.year;
             document.getElementById('descriptionInput').value = data.description;
             
             displayCurrentEntry(data);
+        } else {
+            currentEntry.innerHTML = `
+                <div class="no-entries">
+                    <p>No entry found. Create your first entry above!</p>
+                </div>
+            `;
         }
     } catch (error) {
         console.error('Error loading entry:', error);
+        currentEntry.innerHTML = `
+            <div class="error-message">
+                <p>Error loading your entry. Please try again.</p>
+            </div>
+        `;
     }
 }
 
-// Display current entry
+// Display current entry with animation
 function displayCurrentEntry(data) {
     currentEntry.innerHTML = `
-        <h3>Your Current Entry</h3>
-        <div class="entry-details">
-            <p><strong>Year:</strong> ${data.year}</p>
-            <p><strong>Description:</strong> ${data.description}</p>
+        <div class="entry-content content-loading">
+            <h3>Your Current Entry</h3>
+            <div class="entry-details">
+                <p><strong>Year:</strong> ${data.year}</p>
+                <p><strong>Description:</strong> ${data.description}</p>
+            </div>
         </div>
     `;
 }

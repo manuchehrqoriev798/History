@@ -35,7 +35,13 @@
         <!-- Content Area -->
         <div class="content-area paper-effect">
             <div id="yearContent" class="year-content">
-                <div class="content-placeholder">Select a year to view its history</div>
+                <!-- Add initial loading state -->
+                <div class="loading-spinner">
+                    <div class="loading-text">Loading historical data...</div>
+                </div>
+            </div>
+            <div id="timeline" class="timeline-container">
+                <!-- Timeline content will be populated here -->
             </div>
         </div>
     </div>

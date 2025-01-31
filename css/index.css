@@ -196,3 +196,120 @@ button[type="submit"]:hover {
     box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
     border: 1px solid rgba(139, 69, 19, 0.1);
 }
+
+/* Loading and Animation States */
+.loading-spinner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.loading-spinner::before {
+    content: '';
+    width: 50px;
+    height: 50px;
+    border: 3px solid var(--secondary-color);
+    border-top: 3px solid transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+}
+
+.loading-text {
+    color: var(--text-light);
+    font-style: italic;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Timeline Container */
+.timeline-container {
+    margin-top: 2rem;
+    padding: 1rem;
+}
+
+.timeline-entry {
+    opacity: 0;
+    margin-bottom: 2rem;
+}
+
+.timeline-content {
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    background: var(--bg-secondary);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.year-marker {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+.entry-author {
+    color: var(--text-light);
+    font-style: italic;
+    margin-bottom: 0.5rem;
+}
+
+.entry-description {
+    line-height: 1.6;
+}
+
+.no-entries, .error-message {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-light);
+    font-style: italic;
+}
+
+.error-message {
+    color: var(--error-color);
+}
+
+@keyframes slideUpFade {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Timeline specific styles */
+.timeline-entries {
+    position: relative;
+    padding-left: 2rem;
+    border-left: 2px solid var(--accent-color);
+}
+
+.timeline-entry {
+    position: relative;
+}
+
+.timeline-entry::before {
+    content: '';
+    position: absolute;
+    left: -2.1rem;
+    top: 1.5rem;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--accent-color);
+    border: 2px solid var(--bg-primary);
+}
+
+/* Enhance hover effects */
+.timeline-content:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    transition: all var(--transition-speed);
+}

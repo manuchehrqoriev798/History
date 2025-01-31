@@ -6,55 +6,60 @@
 }
 
 body {
-    font-family: 'Arial', sans-serif;
-    background: #f5f5f5;
-    line-height: 1.6;
-    font-size: var(--font-size-base);
+    font-family: 'Crimson Text', serif;
+    background: var(--bg-primary);
+    line-height: var(--line-height);
+    color: var(--text-primary);
 }
 
 .container {
-    max-width: 1000px;
+    max-width: 1200px;
     margin: 0 auto;
     padding: var(--spacing-unit);
+    position: relative;
+    z-index: 1;
 }
 
 /* Header */
 header {
-    background: var(--card-background);
-    padding: 20px 30px;
-    border-radius: 12px;
-    margin-bottom: 30px;
+    padding: var(--spacing-unit) calc(var(--spacing-unit) * 1.5);
+    margin-bottom: calc(var(--spacing-unit) * 1.5);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
 }
 
 h1, h2, h3 {
-    color: var(--text-primary);
-    margin-bottom: calc(var(--spacing-unit) * 0.75);
     font-family: 'Playfair Display', serif;
+    color: var(--primary-color);
 }
 
-.logout-btn {
+.header-buttons {
+    display: flex;
+    gap: 1rem;
+}
+
+.home-btn, .logout-btn {
     padding: 8px 16px;
-    background: #dc3545;
-    color: white;
+    background: var(--button-primary);
+    color: var(--bg-secondary);
     border: none;
-    border-radius: 4px;
+    border-radius: var(--border-radius);
     cursor: pointer;
+    transition: all var(--transition-speed);
+    text-decoration: none;
+    font-family: 'Crimson Text', serif;
 }
 
-.logout-btn:hover {
-    background: #c82333;
+.home-btn:hover, .logout-btn:hover {
+    background: var(--button-hover);
+    transform: translateY(-2px);
 }
 
 /* Add Year Form */
 .add-year-form {
-    background: var(--card-background);
-    padding: 24px;
-    border-radius: 12px;
-    margin-bottom: 30px;
+    padding: var(--spacing-unit) calc(var(--spacing-unit) * 1.5);
+    margin-bottom: calc(var(--spacing-unit) * 1.5);
 }
 
 .input-group {
@@ -62,71 +67,78 @@ h1, h2, h3 {
 }
 
 input, textarea {
-    font-size: var(--font-size-base);
-    padding: 12px 16px;
-    border: 1px solid #ddd;
-    border-radius: var(--border-radius);
     width: 100%;
-    transition: border-color var(--transition-speed);
+    padding: 12px;
+    border: 1px solid var(--accent-color);
+    border-radius: var(--border-radius);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    font-family: 'Crimson Text', serif;
+    margin-top: 0.5rem;
 }
 
-input:focus, textarea:focus {
-    border-color: var(--accent-color);
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(193, 127, 62, 0.2);
+textarea {
+    min-height: 120px;
+    resize: vertical;
 }
 
-button[type="submit"] {
-    background: #28a745;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
+.submit-btn, .edit-btn, .delete-btn {
+    padding: 12px 24px;
+    border: 2px solid #DAA520;
+    border-radius: var(--border-radius);
     cursor: pointer;
+    transition: all var(--transition-speed);
+    font-family: 'Crimson Text', serif;
+    font-size: var(--font-size-base);
+    box-shadow: 0 0 10px rgba(218, 165, 32, 0.3);
 }
 
-button[type="submit"]:hover {
-    background: #218838;
+.submit-btn {
+    background: var(--button-primary);
+    color: var(--bg-secondary);
+}
+
+.submit-btn:hover {
+    background: var(--button-hover);
+    border-color: #FFD700;
+    box-shadow: 0 0 15px rgba(218, 165, 32, 0.5);
+    transform: translateY(-2px);
 }
 
 /* Timeline Container */
 .timeline-container {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 20px;
+    padding: var(--spacing-unit) calc(var(--spacing-unit) * 1.5);
 }
 
 .year-item {
-    background: var(--card-background);
-    padding: var(--spacing-unit) calc(var(--spacing-unit) * 1.5);
+    background: var(--bg-secondary);
+    padding: var(--spacing-unit);
     margin-bottom: var(--spacing-unit);
     border-radius: var(--border-radius);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--accent-color);
     transition: all var(--transition-speed);
-    border: 1px solid rgba(139, 69, 19, 0.2);
+    opacity: 0;
+    animation: fadeIn 0.3s ease-out forwards;
+    transform: translateY(20px);
+    opacity: 0;
+    animation: slideUpFade 0.5s ease-out forwards;
 }
 
 .year-item:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 8px rgba(139, 69, 19, 0.1);
 }
 
 .year-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 10px;
+    margin-bottom: var(--spacing-unit);
 }
 
 .year-controls {
     display: flex;
     gap: 10px;
-}
-
-.edit-btn, .delete-btn {
-    padding: 8px 16px;
-    border-radius: var(--border-radius);
-    font-weight: 500;
 }
 
 .edit-btn {
@@ -141,12 +153,14 @@ button[type="submit"]:hover {
 
 .year-author {
     color: var(--text-light);
+    font-style: italic;
+    margin-bottom: 0.5rem;
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
     .container {
-        padding: 10px;
+        padding: calc(var(--spacing-unit) / 2);
     }
     
     header {
@@ -154,14 +168,163 @@ button[type="submit"]:hover {
         text-align: center;
         gap: 15px;
     }
+    
+    .year-header {
+        flex-direction: column;
+        gap: 10px;
+    }
 }
 
-/* Improved button styling */
-.button {
-    padding: 12px 24px;
+/* Notification Styles */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    animation: slideIn 0.3s ease-out;
+}
+
+.notification-content {
+    background: var(--bg-secondary);
+    padding: 15px 20px;
     border-radius: var(--border-radius);
-    font-size: var(--font-size-base);
-    font-weight: 600;
-    transition: all var(--transition-speed);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 2px solid #DAA520;
+}
+
+.notification.success .notification-content {
+    border-left: 5px solid #4CAF50;
+}
+
+.notification.error .notification-content {
+    border-left: 5px solid var(--error-color);
+}
+
+.notification-close {
+    background: none;
+    border: none;
+    color: var(--text-primary);
     cursor: pointer;
+    font-size: 20px;
+    padding: 0 5px;
+}
+
+/* Confirm Dialog */
+.confirm-dialog {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.confirm-content {
+    background: var(--bg-secondary);
+    padding: 20px;
+    border-radius: var(--border-radius);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    text-align: center;
+    max-width: 400px;
+    border: 2px solid #DAA520;
+}
+
+.confirm-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.confirm-yes, .confirm-no {
+    padding: 8px 16px;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: all var(--transition-speed);
+    border: 2px solid #DAA520;
+}
+
+.confirm-yes {
+    background: var(--error-color);
+    color: var(--bg-secondary);
+}
+
+.confirm-no {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+/* Edit Form Styles */
+.edit-form {
+    margin-top: 10px;
+}
+
+.edit-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.save-edit-btn, .cancel-edit-btn {
+    padding: 8px 16px;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: all var(--transition-speed);
+    border: 2px solid #DAA520;
+}
+
+.save-edit-btn {
+    background: var(--button-primary);
+    color: var(--bg-secondary);
+}
+
+.cancel-edit-btn {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Loading and Animation States */
+.no-entries, .error-message {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-light);
+    font-style: italic;
+}
+
+.error-message {
+    color: var(--error-color);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUpFade {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
