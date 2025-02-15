@@ -11,7 +11,7 @@ signupForm.addEventListener('submit', async (e) => {
     const name = document.getElementById('name').value.toLowerCase();
     const loginCode = document.getElementById('loginCode').value.toUpperCase();
     const password = document.getElementById('password').value;
-    const email = `${name}@example.com`; // Create email from username
+    const email = `${name}@example.com`;
 
     try {
         // First verify the login code
@@ -26,15 +26,11 @@ signupForm.addEventListener('submit', async (e) => {
         const codes = codesSnapshot.val();
         let role = null;
 
-        // Check admin codes
         if (codes.admin && codes.admin[loginCode]) {
             role = 'admin';
-        }
-        // Check user codes
-        else if (codes.user && codes.user[loginCode]) {
+        } else if (codes.user && codes.user[loginCode]) {
             role = 'user';
-        }
-        else {
+        } else {
             errorMessage.textContent = 'Invalid login code';
             return;
         }
@@ -55,10 +51,21 @@ signupForm.addEventListener('submit', async (e) => {
         sessionStorage.setItem('userRole', role);
         sessionStorage.setItem('userName', name);
 
-        // Add a delay before redirect to allow password save prompt
-        setTimeout(() => {
-            window.location.href = role === 'admin' ? 'admin.html' : 'user.html';
-        }, 1000); // 1 second delay
+        // Show success message and trigger password save
+        const successMessage = document.createElement('div');
+        successMessage.className = 'success-message';
+        successMessage.textContent = 'Account created successfully!';
+        signupForm.appendChild(successMessage);
+
+        // Keep the form data for password manager
+        signupForm.style.display = 'block';
+
+        // Use a more reliable redirect after a brief pause
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // Redirect based on role
+        const redirectURL = role === 'admin' ? 'admin.html' : 'user.html';
+        window.location.replace(redirectURL);
 
     } catch (error) {
         console.error('Signup error:', error);
