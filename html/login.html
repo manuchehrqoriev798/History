@@ -15,14 +15,14 @@
                 <h2>Welcome Back</h2>
                 <p class="subtitle">Please enter your credentials to continue</p>
             </div>
-            <form id="loginForm">
+            <form id="loginForm" autocomplete="on">
                 <div class="input-group">
                     <label for="name">Username</label>
-                    <input type="text" id="name" required>
+                    <input type="text" id="name" name="username" autocomplete="username" required>
                 </div>
                 <div class="input-group">
                     <label for="password">Your Password</label>
-                    <input type="password" id="password" required>
+                    <input type="password" id="password" name="password" autocomplete="current-password" required>
                 </div>
                 <button type="submit" id="loginButton">
                     <span>Sign In</span>
