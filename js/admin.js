@@ -191,8 +191,9 @@ document.getElementById('addYearForm').addEventListener('submit', async (e) => {
     try {
         const newYearRef = ref(db, 'years/' + Date.now());
         await set(newYearRef, {
-            year: parseInt(year),
-            description: description
+            year: year,
+            description: description,
+            userName: 'admin'
         });
         
         document.getElementById('yearInput').value = '';

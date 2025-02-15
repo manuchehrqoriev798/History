@@ -78,7 +78,6 @@ yearForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     
     try {
-        // Ensure user is authenticated
         if (!auth.currentUser) {
             throw new Error('User not authenticated');
         }
@@ -86,21 +85,16 @@ yearForm.addEventListener('submit', async (e) => {
         const year = document.getElementById('yearInput').value;
         const description = document.getElementById('descriptionInput').value;
         
-        // Save to user entries
-        await set(ref(db, `userEntries/${auth.currentUser.uid}`), {
-            year: parseInt(year),
+        const userEntryRef = ref(db, `userEntries/${auth.currentUser.uid}`);
+        await set(userEntryRef, {
+            year: year,
             description: description,
-            userName: userName
+            userName: userName,
+            userId: auth.currentUser.uid,
+            timestamp: Date.now()
         });
         
-        // Also save to years collection for public display
-        await set(ref(db, `years/${auth.currentUser.uid}`), {
-            year: parseInt(year),
-            description: description,
-            userName: userName
-        });
-        
-        displayCurrentEntry({ year, description });
+        loadUserEntry();
         
         // Replace alert with a temporary success message
         const successMessage = document.createElement('div');
@@ -114,7 +108,16 @@ yearForm.addEventListener('submit', async (e) => {
         }, 3000);
     } catch (error) {
         console.error('Error saving entry:', error);
-        alert('Error saving entry. Please try again.');
+        // Show error message to user
+        const errorMessage = document.createElement('div');
+        errorMessage.className = 'error-message';
+        errorMessage.textContent = 'Error saving entry. Please try again.';
+        yearForm.insertAdjacentElement('beforeend', errorMessage);
+        
+        // Remove the error message after 3 seconds
+        setTimeout(() => {
+            errorMessage.remove();
+        }, 3000);
     }
 });
 
