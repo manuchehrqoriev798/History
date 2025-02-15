@@ -1,5 +1,6 @@
 import { db } from './firebase-config.js';
 import { ref, set, get, remove, query, orderByChild } from 'https://www.gstatic.com/firebasejs/9.1.3/firebase-database.js';
+import { initializeRichTextEditor } from './richTextEditor.js';
 
 // Check if user is logged in as admin
 if (!sessionStorage.getItem('userName') || sessionStorage.getItem('userRole') !== 'admin') {
@@ -211,4 +212,7 @@ document.getElementById('logoutBtn').addEventListener('click', () => {
 });
 
 // Initialize
-loadYears(); 
+document.addEventListener('DOMContentLoaded', () => {
+    initializeRichTextEditor('descriptionInput');
+    loadYears();
+}); 

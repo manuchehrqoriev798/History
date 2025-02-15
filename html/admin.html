@@ -6,7 +6,6 @@
     <title>Faculty History - Admin</title>
     <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:wght@400;600&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/theme.css">
-    <link rel="stylesheet" href="../css/particles.css">
     <link rel="stylesheet" href="../css/admin.css">
 </head>
 <body>
@@ -23,9 +22,45 @@
             <h2>Add New Historical Entry</h2>
             <form id="addYearForm">
                 <div class="input-group">
-                    <input type="number" id="yearInput" placeholder="Year" required>
+                    <input type="text" id="yearInput" placeholder="Year (e.g., 500 BC, 2024 AD)" required>
                 </div>
                 <div class="input-group">
+                    <div class="editor-controls">
+                        <button type="button" class="format-btn" data-format="bold">B</button>
+                        <button type="button" class="format-btn" data-format="italic">I</button>
+                        <button type="button" class="format-btn" data-format="underline">U</button>
+                        <button type="button" class="format-btn" data-format="indent">→</button>
+                        <button type="button" class="format-btn" data-format="outdent">←</button>
+                        <select class="format-btn" data-format="fontFamily">
+                            <option value="'Times New Roman', serif" selected>Times New Roman</option>
+                            <option value="'Crimson Text', serif">Crimson Text</option>
+                            <option value="'Georgia', serif">Georgia</option>
+                            <option value="'Palatino', serif">Palatino</option>
+                            <option value="'Garamond', serif">Garamond</option>
+                            <option value="'Baskerville', serif">Baskerville</option>
+                            <option value="'Bookman', serif">Bookman</option>
+                            <option value="'Cambria', serif">Cambria</option>
+                            <option value="'Arial', sans-serif">Arial</option>
+                            <option value="'Helvetica', sans-serif">Helvetica</option>
+                            <option value="'Verdana', sans-serif">Verdana</option>
+                            <option value="'Tahoma', sans-serif">Tahoma</option>
+                            <option value="'Century Gothic', sans-serif">Century Gothic</option>
+                        </select>
+                        <select class="format-btn" data-format="fontSize">
+                            <option value="1">Small</option>
+                            <option value="2">Normal</option>
+                            <option value="3" selected>Default size</option>
+                            <option value="4">Large</option>
+                            <option value="5">Larger</option>
+                        </select>
+                        <select class="format-btn" data-format="color">
+                            <option value="var(--text-primary)">Black</option>
+                            <option value="#4CAF50">Green</option>
+                            <option value="#2196F3">Blue</option>
+                            <option value="#F44336">Red</option>
+                            <option value="#FFC107">Yellow</option>
+                        </select>
+                    </div>
                     <textarea id="descriptionInput" placeholder="Historical Description" required></textarea>
                 </div>
                 <button type="submit" class="submit-btn">Add Entry</button>
@@ -33,7 +68,7 @@
         </div>
 
         <div class="timeline-container paper-effect">
-            <h2>Historical Timeline</h2>
+            <h2 class="timeline-heading">Historical Timeline</h2>
             <div id="yearsList" class="years-list"></div>
         </div>
         <div class="background-slideshow">
@@ -47,11 +82,6 @@
         
     </div>
 
-    <script type="module" src="../js/particles.js"></script>
-    <script type="module">
-        import { ParticleSystem } from '../js/particles.js';
-        new ParticleSystem();
-    </script>
     <script type="module" src="../js/admin.js"></script>
 </body>
 </html> 

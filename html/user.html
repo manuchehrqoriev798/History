@@ -23,9 +23,45 @@
                 <h2>Write here</h2>
                 <form id="yearForm">
                     <div class="input-group">
-                        <input type="number" id="yearInput" placeholder="Year" required>
+                        <input type="text" id="yearInput" placeholder="Year (e.g., 500 BC, 2024 AD)" required>
                     </div>
                     <div class="input-group">
+                        <div class="editor-controls">
+                            <button type="button" class="format-btn" data-format="bold">B</button>
+                            <button type="button" class="format-btn" data-format="italic">I</button>
+                            <button type="button" class="format-btn" data-format="underline">U</button>
+                            <button type="button" class="format-btn" data-format="indent">→</button>
+                            <button type="button" class="format-btn" data-format="outdent">←</button>
+                            <select class="format-btn" data-format="fontFamily">
+                                <option value="'Times New Roman', serif" selected>Times New Roman</option>
+                                <option value="'Crimson Text', serif">Crimson Text</option>
+                                <option value="'Georgia', serif">Georgia</option>
+                                <option value="'Palatino', serif">Palatino</option>
+                                <option value="'Garamond', serif">Garamond</option>
+                                <option value="'Baskerville', serif">Baskerville</option>
+                                <option value="'Bookman', serif">Bookman</option>
+                                <option value="'Cambria', serif">Cambria</option>
+                                <option value="'Arial', sans-serif">Arial</option>
+                                <option value="'Helvetica', sans-serif">Helvetica</option>
+                                <option value="'Verdana', sans-serif">Verdana</option>
+                                <option value="'Tahoma', sans-serif">Tahoma</option>
+                                <option value="'Century Gothic', sans-serif">Century Gothic</option>
+                            </select>
+                            <select class="format-btn" data-format="fontSize">
+                                <option value="1">Small</option>
+                                <option value="2">Normal</option>
+                                <option value="3" selected>Default size</option>
+                                <option value="4">Large</option>
+                                <option value="5">Larger</option>
+                            </select>
+                            <select class="format-btn" data-format="color">
+                                <option value="var(--text-primary)">Black</option>
+                                <option value="#4CAF50">Green</option>
+                                <option value="#2196F3">Blue</option>
+                                <option value="#F44336">Red</option>
+                                <option value="#FFC107">Yellow</option>
+                            </select>
+                        </div>
                         <textarea id="descriptionInput" placeholder="Historical Description" required></textarea>
                     </div>
                     <button type="submit" id="submitBtn">Save Entry</button>
@@ -45,12 +81,7 @@
         </div>
     </div>
 
-    <script type="module">
-        import { ParticleSystem } from '../js/particles.js';
-        new ParticleSystem();
-    </script>
     <script type="module" src="../js/user.js"></script>
-
 
 </body>
 </html> 

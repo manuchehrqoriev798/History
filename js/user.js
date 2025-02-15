@@ -1,6 +1,7 @@
 import { db, auth } from './firebase-config.js';
 import { ref, get, set, query, orderByChild } from 'https://www.gstatic.com/firebasejs/9.1.3/firebase-database.js';
 import { signInWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/9.1.3/firebase-auth.js';
+import { initializeRichTextEditor } from './richTextEditor.js';
 
 // Check if user is logged in
 if (!sessionStorage.getItem('userName')) {
@@ -135,4 +136,10 @@ auth.onAuthStateChanged((user) => {
     } else {
         window.location.href = 'login.html';
     }
+});
+
+// Add this line after your other initialization code
+document.addEventListener('DOMContentLoaded', () => {
+    initializeRichTextEditor('descriptionInput');
+    // ... your existing initialization code ...
 }); 

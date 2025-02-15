@@ -29,7 +29,12 @@ header {
     align-items: center;
 }
 
-h1, h2, h3 {
+h1 {
+    font-family: 'Playfair Display', serif;
+    color: var(--bg-secondary);
+}
+
+h2, h3 {
     font-family: 'Playfair Display', serif;
     color: var(--primary-color);
 }
@@ -75,6 +80,12 @@ input, textarea {
     color: var(--text-primary);
     font-family: 'Crimson Text', serif;
     margin-top: 0.5rem;
+    font-size: 1rem;
+}
+
+/* Added specific style for year input to match number input width */
+input[id="yearInput"] {
+    text-transform: uppercase;
 }
 
 textarea {
@@ -327,4 +338,54 @@ textarea {
         transform: translateY(0);
         opacity: 1;
     }
+}
+
+.timeline-heading {
+    color: white;
+}
+
+/* Rich Text Editor Controls */
+.editor-controls {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+    background: var(--bg-secondary);
+    padding: 8px;
+    border: 1px solid var(--accent-color);
+    border-radius: var(--border-radius);
+}
+
+.format-btn {
+    padding: 6px 12px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--accent-color);
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: all var(--transition-speed);
+    font-family: 'Crimson Text', serif;
+    color: var(--text-primary);
+}
+
+.format-btn:hover {
+    background: var(--accent-color);
+    color: var(--bg-secondary);
+}
+
+.format-btn.active {
+    background: var(--accent-color);
+    color: var(--bg-secondary);
+}
+
+/* Style for formatted text in textarea */
+#descriptionInput {
+    min-height: 200px;
+    font-family: 'Crimson Text', serif;
+    line-height: 1.6;
+    white-space: pre-wrap;
+}
+
+.format-marker {
+    display: inline;
+    white-space: pre-wrap;
 }
