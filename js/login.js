@@ -1,9 +1,6 @@
 import { db, auth } from './firebase-config.js';
 import { ref, get } from 'https://www.gstatic.com/firebasejs/9.1.3/firebase-database.js';
 import { signInWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/9.1.3/firebase-auth.js';
-import { ParticleSystem } from './particles.js';
-
-const particleSystem = new ParticleSystem();  // Initialize particle system
 
 const loginForm = document.getElementById('loginForm');
 const errorMessage = document.getElementById('errorMessage');
@@ -11,9 +8,9 @@ const errorMessage = document.getElementById('errorMessage');
 loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     
-    const name = document.getElementById('name').value.toLowerCase();
+    const name = document.getElementById('name').value.trim().toLowerCase();
     const password = document.getElementById('password').value;
-    const email = `${name}@example.com`; // Create email from username
+    const email = `${name}@example.com`; // Ensure this format matches stored emails
 
     try {
         // Authenticate with Firebase
@@ -26,13 +23,13 @@ loginForm.addEventListener('submit', async (e) => {
         
         if (!userSnapshot.exists()) {
             await auth.signOut();
-            errorMessage.textContent = 'User not found';
+            errorMessage.textContent = 'User not found in database.';
             return;
         }
 
         const userData = userSnapshot.val();
         
-        // Login successful
+        // Securely store only necessary data
         sessionStorage.setItem('userRole', userData.role);
         sessionStorage.setItem('userName', name);
 
@@ -41,12 +38,17 @@ loginForm.addEventListener('submit', async (e) => {
 
     } catch (error) {
         console.error('Login error:', error);
-        if (error.code === 'auth/invalid-login-credentials') {
-            errorMessage.textContent = 'Invalid username or password';
-        } else if (error.code === 'auth/too-many-requests') {
-            errorMessage.textContent = 'Too many failed attempts. Please try again later.';
-        } else {
-            errorMessage.textContent = 'Login failed. Please try again.';
+        switch (error.code) {
+            case 'auth/user-not-found':
+            case 'auth/wrong-password':
+                errorMessage.textContent = 'Invalid username or password';
+                break;
+            case 'auth/too-many-requests':
+                errorMessage.textContent = 'Too many failed attempts. Please try again later.';
+                break;
+            default:
+                errorMessage.textContent = 'Login failed. Please try again.';
+                break;
         }
     }
-}); 
+});
