@@ -55,8 +55,10 @@ signupForm.addEventListener('submit', async (e) => {
         sessionStorage.setItem('userRole', role);
         sessionStorage.setItem('userName', name);
 
-        // Redirect based on role
-        window.location.href = role === 'admin' ? 'admin.html' : 'user.html';
+        // Add a delay before redirect to allow password save prompt
+        setTimeout(() => {
+            window.location.href = role === 'admin' ? 'admin.html' : 'user.html';
+        }, 1000); // 1 second delay
 
     } catch (error) {
         console.error('Signup error:', error);
