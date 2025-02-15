@@ -51,21 +51,28 @@ signupForm.addEventListener('submit', async (e) => {
         sessionStorage.setItem('userRole', role);
         sessionStorage.setItem('userName', name);
 
-        // Show success message and trigger password save
+        // Create success message
         const successMessage = document.createElement('div');
         successMessage.className = 'success-message';
         successMessage.textContent = 'Account created successfully!';
         signupForm.appendChild(successMessage);
 
-        // Keep the form data for password manager
-        signupForm.style.display = 'block';
+        // Disable the form inputs but keep them visible
+        Array.from(signupForm.elements).forEach(element => {
+            element.disabled = true;
+        });
 
-        // Use a more reliable redirect after a brief pause
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        // Redirect based on role
+        // Create a hidden iframe for the redirect
+        const iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        document.body.appendChild(iframe);
+
+        // Wait for password manager
+        await new Promise(resolve => setTimeout(resolve, 1500));
+
+        // Perform the redirect
         const redirectURL = role === 'admin' ? 'admin.html' : 'user.html';
-        window.location.replace(redirectURL);
+        window.location.href = redirectURL;
 
     } catch (error) {
         console.error('Signup error:', error);
