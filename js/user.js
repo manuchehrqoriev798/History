@@ -21,42 +21,68 @@ function showLoading(element) {
     `;
 }
 
-// Load user's entry with loading state
-async function loadUserEntry() {
-    showLoading(currentEntry);
-    
-    try {
-        // Ensure user is authenticated
-        if (!auth.currentUser) {
-            throw new Error('User not authenticated');
-        }
+// Add notification function
+function showNotification(message, type = 'success') {
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.innerHTML = `
+        <div class="notification-content">
+            <p>${message}</p>
+            <button class="notification-close">&times;</button>
+        </div>
+    `;
+    document.body.appendChild(notification);
 
-        const userEntryRef = ref(db, `userEntries/${auth.currentUser.uid}`);
+    // Add close button functionality
+    notification.querySelector('.notification-close').addEventListener('click', () => {
+        notification.remove();
+    });
+
+    // Auto remove after 3 seconds
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+
+// Load user's current entry when page loads
+async function loadUserEntry() {
+    try {
+        const uid = auth.currentUser?.uid;
+        if (!uid) return;
+
+        const userEntryRef = ref(db, `users/${uid}/entries`);
         const snapshot = await get(userEntryRef);
-        
-        // Add a small delay for smooth transition
-        await new Promise(resolve => setTimeout(resolve, 300));
-        
+
         if (snapshot.exists()) {
-            const data = snapshot.val();
-            document.getElementById('yearInput').value = data.year;
-            document.getElementById('descriptionInput').value = data.description;
+            const entryData = snapshot.val();
+            // Fill in the form with existing data
+            document.getElementById('yearInput').value = entryData.year;
+            const descriptionInput = document.getElementById('descriptionInput');
+            descriptionInput.value = entryData.description;
             
-            displayCurrentEntry(data);
+            // Update the editable div content
+            const editableDiv = descriptionInput.previousSibling;
+            if (editableDiv && editableDiv.className === 'editable-content') {
+                editableDiv.innerHTML = entryData.description;
+            }
+            
+            // Update the current entry display
+            currentEntry.innerHTML = `
+                <h3>Your Current Entry</h3>
+                <div class="entry-content">
+                    <p><strong>Year:</strong> ${entryData.year}</p>
+                    <div class="description-content">${entryData.description}</div>
+                </div>
+            `;
         } else {
             currentEntry.innerHTML = `
-                <div class="no-entries">
-                    <p>No entry found. Create your first entry above!</p>
-                </div>
+                <h3>Your Entry</h3>
+                <p class="no-entry-message">You haven't created an entry yet. Use the form above to add your historical entry.</p>
             `;
         }
     } catch (error) {
-        console.error('Error loading entry:', error);
-        currentEntry.innerHTML = `
-            <div class="error-message">
-                <p>Error loading your entry. Please try again.</p>
-            </div>
-        `;
+        console.error('Error loading user entry:', error);
+        showNotification('Error loading your entry', 'error');
     }
 }
 
@@ -73,51 +99,52 @@ function displayCurrentEntry(data) {
     `;
 }
 
-// Handle form submission
-yearForm.addEventListener('submit', async (e) => {
+// Update the form submission handler
+document.getElementById('yearForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     
+    const year = document.getElementById('yearInput').value;
+    const descriptionInput = document.getElementById('descriptionInput');
+    const description = descriptionInput.value;
+    const userName = sessionStorage.getItem('userName');
+    const uid = auth.currentUser?.uid;
+    
+    if (!uid) {
+        window.location.href = 'login.html';
+        return;
+    }
+    
     try {
-        if (!auth.currentUser) {
-            throw new Error('User not authenticated');
-        }
-
-        const year = document.getElementById('yearInput').value;
-        const description = document.getElementById('descriptionInput').value;
-        
-        const userEntryRef = ref(db, `userEntries/${auth.currentUser.uid}`);
+        const userEntryRef = ref(db, `users/${uid}/entries`);
         await set(userEntryRef, {
             year: year,
             description: description,
             userName: userName,
-            userId: auth.currentUser.uid,
-            timestamp: Date.now()
+            lastUpdated: new Date().toISOString()
         });
         
-        loadUserEntry();
+        // Update the editable div content after successful save
+        const editableDiv = descriptionInput.previousSibling;
+        if (editableDiv && editableDiv.className === 'editable-content') {
+            editableDiv.innerHTML = description;
+        }
         
-        // Replace alert with a temporary success message
-        const successMessage = document.createElement('div');
-        successMessage.className = 'success-message';
-        successMessage.textContent = 'Entry saved successfully!';
-        yearForm.insertAdjacentElement('beforeend', successMessage);
+        // Update the current entry display
+        currentEntry.innerHTML = `
+            <h3>Your Current Entry</h3>
+            <div class="entry-content">
+                <p><strong>Year:</strong> ${year}</p>
+                <div class="description-content">${description}</div>
+            </div>
+        `;
         
-        // Remove the message after 3 seconds
-        setTimeout(() => {
-            successMessage.remove();
-        }, 3000);
+        // Store in localStorage
+        localStorage.setItem(`editor_descriptionInput`, description);
+        
+        showNotification('Entry saved successfully');
     } catch (error) {
         console.error('Error saving entry:', error);
-        // Show error message to user
-        const errorMessage = document.createElement('div');
-        errorMessage.className = 'error-message';
-        errorMessage.textContent = 'Error saving entry. Please try again.';
-        yearForm.insertAdjacentElement('beforeend', errorMessage);
-        
-        // Remove the error message after 3 seconds
-        setTimeout(() => {
-            errorMessage.remove();
-        }, 3000);
+        showNotification('Error saving entry', 'error');
     }
 });
 
@@ -141,8 +168,8 @@ auth.onAuthStateChanged((user) => {
     }
 });
 
-// Add this line after your other initialization code
+// Initialize the page
 document.addEventListener('DOMContentLoaded', () => {
     initializeRichTextEditor('descriptionInput');
-    // ... your existing initialization code ...
+    loadUserEntry(); // Add this line to load the user's entry when page loads
 }); 

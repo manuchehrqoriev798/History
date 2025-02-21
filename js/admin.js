@@ -65,16 +65,9 @@ async function loadYears() {
             
             yearsArray.sort((a, b) => b.year - a.year);
             
-            // Update the editable content with the most recent entry
-            if (yearsArray.length > 0) {
-                const descriptionInput = document.getElementById('descriptionInput');
-                if (descriptionInput) {
-                    descriptionInput.innerHTML = yearsArray[0].description || '';
-                }
-            }
-            
             yearsArray.forEach((yearData, index) => {
                 const yearElement = createYearElement(yearData.id, yearData);
+                // Add staggered animation delay
                 yearElement.style.animation = `fadeIn 0.3s ease-out ${index * 0.1}s`;
                 yearElement.style.opacity = '0';
                 yearElement.style.animationFillMode = 'forwards';
@@ -105,9 +98,9 @@ function createYearElement(yearId, yearData) {
         </div>
         <p class="year-author">Added by: ${yearData.userName || 'Admin'}</p>
         <div class="year-content">
-            <div class="description-text">${yearData.description || ''}</div>
+            <p class="description-text">${yearData.description}</p>
             <div class="edit-form" style="display: none;">
-                <textarea class="edit-description">${yearData.description || ''}</textarea>
+                <textarea class="edit-description">${yearData.description}</textarea>
                 <div class="edit-buttons">
                     <button class="save-edit-btn">Save</button>
                     <button class="cancel-edit-btn">Cancel</button>
@@ -128,35 +121,28 @@ function createYearElement(yearId, yearData) {
     editBtn.addEventListener('click', () => {
         descriptionText.style.display = 'none';
         editForm.style.display = 'block';
-        editTextarea.value = yearData.description || '';
+        editTextarea.value = yearData.description;
+        const editableDiv = editTextarea.previousSibling;
+        editableDiv.innerHTML = yearData.description;
         editTextarea.focus();
     });
 
     cancelEditBtn.addEventListener('click', () => {
         descriptionText.style.display = 'block';
         editForm.style.display = 'none';
-        editTextarea.value = yearData.description || '';
+        editTextarea.value = yearData.description;
     });
 
     saveEditBtn.addEventListener('click', async () => {
         try {
             const yearRef = ref(db, 'years/' + yearId);
-            const updatedData = {
+            await set(yearRef, {
                 year: yearData.year,
                 description: editTextarea.value,
-                userName: yearData.userName || 'Admin'
-            };
-            await set(yearRef, updatedData);
-            
-            // Update the visible text and yearData
-            descriptionText.innerHTML = editTextarea.value;
-            yearData.description = editTextarea.value;
-            
-            // Hide edit form
-            descriptionText.style.display = 'block';
-            editForm.style.display = 'none';
-            
+                userName: 'admin'
+            });
             showNotification('Entry updated successfully');
+            loadYears();
         } catch (error) {
             console.error('Error editing year:', error);
             showNotification('Error updating entry', 'error');
@@ -202,33 +188,25 @@ function createYearElement(yearId, yearData) {
 document.getElementById('addYearForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     
-    const year = document.getElementById('yearInput').value;
-    const description = document.getElementById('descriptionInput').value;
+    const yearInput = document.getElementById('yearInput');
+    const descriptionInput = document.getElementById('descriptionInput');
+    const editableDiv = descriptionInput.previousSibling;
     
     try {
         const newYearRef = ref(db, 'years/' + Date.now());
-        const yearData = {
-            year: year,
-            description: description,
-            userName: sessionStorage.getItem('userName') || 'admin'
-        };
+        await set(newYearRef, {
+            year: yearInput.value,
+            description: descriptionInput.value,
+            userName: 'admin'
+        });
         
-        await set(newYearRef, yearData);
-        
-        // Clear form
-        document.getElementById('yearInput').value = '';
-        document.getElementById('descriptionInput').value = '';
+        // Clear both the textarea and editable div
+        yearInput.value = '';
+        descriptionInput.value = '';
+        editableDiv.innerHTML = '';
         
         showNotification('Entry added successfully');
-        
-        // Reload years to show new entry
-        await loadYears();
-        
-        // Update the editable content with the new entry
-        const descriptionInput = document.getElementById('descriptionInput');
-        if (descriptionInput) {
-            descriptionInput.innerHTML = description;
-        }
+        loadYears();
     } catch (error) {
         console.error('Error adding year:', error);
         showNotification('Error adding entry', 'error');
@@ -245,19 +223,4 @@ document.getElementById('logoutBtn').addEventListener('click', () => {
 document.addEventListener('DOMContentLoaded', () => {
     initializeRichTextEditor('descriptionInput');
     loadYears();
-    
-    // Add event listener for description input changes
-    const descriptionInput = document.getElementById('descriptionInput');
-    if (descriptionInput) {
-        descriptionInput.addEventListener('input', () => {
-            // Save content to localStorage as backup
-            localStorage.setItem('lastDescription', descriptionInput.innerHTML);
-        });
-        
-        // Restore content from localStorage if available
-        const lastDescription = localStorage.getItem('lastDescription');
-        if (lastDescription) {
-            descriptionInput.innerHTML = lastDescription;
-        }
-    }
 }); 

@@ -19,14 +19,65 @@ export function initializeRichTextEditor(textareaId) {
         font-size: 14px;
     `;
     
+    // Insert editable div before textarea
+    originalTextarea.parentNode.insertBefore(editableDiv, originalTextarea);
+
+    // Keep textarea and localStorage in sync with editable div
+    const updateContent = () => {
+        const content = editableDiv.innerHTML;
+        originalTextarea.value = content;
+        localStorage.setItem(`editor_${textareaId}`, content);
+        originalTextarea.dispatchEvent(new Event('input', { bubbles: true }));
+    };
+
+    // Initialize content from localStorage or textarea
+    const savedContent = localStorage.getItem(`editor_${textareaId}`) || originalTextarea.value;
+    if (savedContent) {
+        editableDiv.innerHTML = savedContent;
+        originalTextarea.value = savedContent;
+    }
+
+    // Update on input and blur
+    editableDiv.addEventListener('input', updateContent);
+    editableDiv.addEventListener('blur', updateContent);
+
+    // Handle form submission
+    if (originalTextarea.form) {
+        originalTextarea.form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            updateContent(); // Ensure latest content is saved
+            
+            try {
+                // Let the form's normal submit handler process
+                const formData = new FormData(originalTextarea.form);
+                const yearInput = formData.get('yearInput');
+                const description = formData.get('descriptionInput');
+
+                // Store the content before submission
+                const contentBeforeSubmit = editableDiv.innerHTML;
+                
+                // Dispatch the submit event
+                await originalTextarea.form.dispatchEvent(new Event('submit', { cancelable: true }));
+                
+                // After successful submission, restore the content
+                editableDiv.innerHTML = contentBeforeSubmit;
+                originalTextarea.value = contentBeforeSubmit;
+                localStorage.setItem(`editor_${textareaId}`, contentBeforeSubmit);
+                
+            } catch (error) {
+                console.error('Form submission error:', error);
+            }
+        });
+    }
+
     // Track current format state
     let currentFormats = {
         bold: false,
         italic: false,
         underline: false,
-        fontSize: '3', // Default size
-        color: '#000000', // Default color
-        fontFamily: "'Times New Roman', serif" // Default font changed to Times New Roman
+        fontSize: '3',
+        color: '#000000',
+        fontFamily: "'Times New Roman', serif"
     };
     
     // Instead of hiding the textarea, position it off-screen
@@ -40,13 +91,6 @@ export function initializeRichTextEditor(textareaId) {
         padding: 0;
         margin: 0;
     `;
-    originalTextarea.parentNode.insertBefore(editableDiv, originalTextarea);
-
-    // Keep textarea value in sync with editable div
-    const updateTextarea = () => {
-        originalTextarea.value = editableDiv.innerHTML;
-        originalTextarea.dispatchEvent(new Event('input', { bubbles: true }));
-    };
 
     // Apply current formats to selection or cursor position
     function applyCurrentFormats() {
@@ -142,19 +186,6 @@ export function initializeRichTextEditor(textareaId) {
         document.execCommand('insertText', false, text);
         applyCurrentFormats();
     });
-
-    // Keep textarea updated
-    editableDiv.addEventListener('input', updateTextarea);
-    editableDiv.addEventListener('blur', updateTextarea);
-
-    // Sync before form submission
-    if (originalTextarea.form) {
-        originalTextarea.form.addEventListener('submit', updateTextarea);
-    }
-
-    // Initialize content
-    editableDiv.innerHTML = originalTextarea.value || '';
-    updateTextarea();
 }
 
 function handleIndentation(editableDiv, action) {
