@@ -12,6 +12,76 @@ const userName = sessionStorage.getItem('userName');
 const yearForm = document.getElementById('yearForm');
 const currentEntry = document.getElementById('currentEntry');
 
+// Show notification function with improved styling
+function showNotification(message, type = 'success') {
+    // Remove any existing notifications first
+    const existingNotifications = document.querySelectorAll('.notification');
+    existingNotifications.forEach(notification => notification.remove());
+
+    // Create new notification
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 25px;
+        border-radius: 8px;
+        background-color: ${type === 'success' ? '#4CAF50' : '#f44336'};
+        color: white;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        opacity: 0;
+        transform: translateY(-20px);
+        transition: all 0.3s ease;
+    `;
+
+    // Add success icon for success message
+    const icon = type === 'success' ? '✓' : '!';
+    
+    notification.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 20px; font-weight: bold;">${icon}</span>
+            <p style="margin: 0; font-size: 16px;">${message}</p>
+        </div>
+        <button class="notification-close" style="
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 0 5px;
+            margin-left: 15px;
+        ">&times;</button>
+    `;
+
+    document.body.appendChild(notification);
+
+    // Trigger animation
+    setTimeout(() => {
+        notification.style.opacity = '1';
+        notification.style.transform = 'translateY(0)';
+    }, 10);
+
+    // Add close button functionality
+    const closeButton = notification.querySelector('.notification-close');
+    closeButton.addEventListener('click', () => {
+        notification.style.opacity = '0';
+        notification.style.transform = 'translateY(-20px)';
+        setTimeout(() => notification.remove(), 300);
+    });
+
+    // Auto remove after 3 seconds
+    setTimeout(() => {
+        notification.style.opacity = '0';
+        notification.style.transform = 'translateY(-20px)';
+        setTimeout(() => notification.remove(), 3000);
+    }, 3000);
+}
+
 // Show loading spinner
 function showLoading(element) {
     element.innerHTML = `
@@ -19,29 +89,6 @@ function showLoading(element) {
             <div class="loading-text">Loading your entry...</div>
         </div>
     `;
-}
-
-// Add notification function
-function showNotification(message, type = 'success') {
-    const notification = document.createElement('div');
-    notification.className = `notification ${type}`;
-    notification.innerHTML = `
-        <div class="notification-content">
-            <p>${message}</p>
-            <button class="notification-close">&times;</button>
-        </div>
-    `;
-    document.body.appendChild(notification);
-
-    // Add close button functionality
-    notification.querySelector('.notification-close').addEventListener('click', () => {
-        notification.remove();
-    });
-
-    // Auto remove after 3 seconds
-    setTimeout(() => {
-        notification.remove();
-    }, 3000);
 }
 
 // Load user's current entry when page loads
@@ -99,7 +146,7 @@ function displayCurrentEntry(data) {
     `;
 }
 
-// Update the form submission handler
+// Update the form submission handler to use the new notification
 document.getElementById('yearForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     
@@ -118,6 +165,15 @@ document.getElementById('yearForm').addEventListener('submit', async (e) => {
         // Save to user's personal entries
         const userEntryRef = ref(db, `users/${uid}/entries`);
         await set(userEntryRef, {
+            year: year,
+            description: description,
+            userName: userName,
+            lastUpdated: new Date().toISOString()
+        });
+
+        // Also save to years collection for public display
+        const yearRef = ref(db, `years/${Date.now()}`);
+        await set(yearRef, {
             year: year,
             description: description,
             userName: userName,
@@ -151,7 +207,7 @@ document.getElementById('yearForm').addEventListener('submit', async (e) => {
         // Store in localStorage
         localStorage.setItem(`editor_descriptionInput`, description);
         
-        showNotification('Entry saved successfully');
+        showNotification('Entry saved successfully! 🎉');
     } catch (error) {
         console.error('Error saving entry:', error);
         showNotification('Error saving entry', 'error');
