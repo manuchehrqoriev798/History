@@ -236,10 +236,46 @@ auth.onAuthStateChanged((user) => {
     }
 });
 
+
 // Initialize the page
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     initializeRichTextEditor('descriptionInput');
-    loadUserEntry(); // Add this line to load the user's entry when page loads
+    
+    // Load user's last entry
+    try {
+        const userEntriesRef = ref(db, 'userEntries');
+        const snapshot = await get(userEntriesRef);
+        
+        if (snapshot.exists()) {
+            let lastEntry = null;
+            let latestTimestamp = 0;
+            
+            snapshot.forEach((childSnapshot) => {
+                const entry = childSnapshot.val();
+                if (entry.userName === userName && entry.timestamp > latestTimestamp) {
+                    lastEntry = entry;
+                    latestTimestamp = entry.timestamp;
+                }
+            });
+            
+            if (lastEntry) {
+                // Set the content in both the textarea and editable div
+                const descriptionInput = document.getElementById('descriptionInput');
+                const editableDiv = descriptionInput.previousSibling;
+                
+                descriptionInput.value = lastEntry.description;
+                editableDiv.innerHTML = lastEntry.description;
+                
+                // Set the year if it exists
+                const yearInput = document.getElementById('yearInput');
+                if (yearInput && lastEntry.year) {
+                    yearInput.value = lastEntry.year;
+                }
+            }
+        }
+    } catch (error) {
+        console.error('Error loading user\'s last entry:', error);
+    }
 });
 
 // Modify the loadYears function to prevent duplicates

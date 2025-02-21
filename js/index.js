@@ -83,32 +83,42 @@ async function loadYears() {
         ]);
         
         const yearsArray = [];
+        const seenYears = new Set(); // Track unique year entries
         
         // Process public years
         if (yearsSnapshot.exists()) {
             yearsSnapshot.forEach((childSnapshot) => {
-                yearsArray.push({
-                    id: childSnapshot.key,
-                    ...childSnapshot.val()
-                });
-            });
-        }
-        
-        // Process user entries
-        if (userEntriesSnapshot.exists()) {
-            userEntriesSnapshot.forEach((childSnapshot) => {
-                const userData = childSnapshot.val();
-                if (!yearsArray.some(entry => entry.year === userData.year)) {
+                const yearData = childSnapshot.val();
+                const yearKey = `${yearData.year}-${yearData.userName}`; // Create unique key
+                if (!seenYears.has(yearKey)) {
+                    seenYears.add(yearKey);
                     yearsArray.push({
                         id: childSnapshot.key,
-                        ...userData
+                        ...yearData
                     });
                 }
             });
         }
         
+        // Process user entries
+        if (userEntriesSnapshot.exists()) {
+            userEntriesSnapshot.forEach((userSnapshot) => {
+                const userData = userSnapshot.val();
+                if (userData.year && userData.description) {
+                    const yearKey = `${userData.year}-${userData.userName}`;
+                    if (!seenYears.has(yearKey)) {
+                        seenYears.add(yearKey);
+                        yearsArray.push({
+                            id: userSnapshot.key,
+                            ...userData
+                        });
+                    }
+                }
+            });
+        }
+        
         if (yearsArray.length > 0) {
-            // Sort years once
+            // Sort years in descending order
             yearsArray.sort((a, b) => b.year - a.year);
             
             // Immediately show first year
