@@ -238,4 +238,74 @@ auth.onAuthStateChanged((user) => {
 document.addEventListener('DOMContentLoaded', () => {
     initializeRichTextEditor('descriptionInput');
     loadUserEntry(); // Add this line to load the user's entry when page loads
-}); 
+});
+
+// Modify the loadYears function to prevent duplicates
+async function loadYears() {
+    const yearsList = document.getElementById('yearsList');
+    showLoading(yearsList);
+    
+    try {
+        const yearsRef = ref(db, 'years');
+        const yearsQuery = query(yearsRef, orderByChild('year'));
+        const snapshot = await get(yearsQuery);
+        
+        yearsList.innerHTML = '';
+        
+        if (snapshot.exists()) {
+            // Create a map to store unique entries by year
+            const uniqueYears = new Map();
+            
+            snapshot.forEach((childSnapshot) => {
+                const yearData = childSnapshot.val();
+                const year = yearData.year;
+                
+                // Only keep the most recent entry for each year
+                if (!uniqueYears.has(year) || 
+                    yearData.timestamp > uniqueYears.get(year).timestamp) {
+                    uniqueYears.set(year, {
+                        id: childSnapshot.key,
+                        ...yearData
+                    });
+                }
+            });
+            
+            // Convert map to array and sort by year
+            const yearsArray = Array.from(uniqueYears.values())
+                .sort((a, b) => b.year - a.year);
+            
+            yearsArray.forEach((yearData, index) => {
+                const yearElement = createYearElement(yearData.id, yearData);
+                yearElement.style.animation = `fadeIn 0.3s ease-out ${index * 0.1}s`;
+                yearElement.style.opacity = '0';
+                yearElement.style.animationFillMode = 'forwards';
+                yearsList.appendChild(yearElement);
+            });
+        } else {
+            yearsList.innerHTML = '<p class="no-entries">No historical entries found.</p>';
+        }
+    } catch (error) {
+        console.error('Error loading years:', error);
+        showNotification('Error loading years', 'error');
+        yearsList.innerHTML = '<p class="error-message">Error loading entries. Please try again.</p>';
+    }
+}
+
+// Modify the addYear function to include a timestamp
+async function addYear(year, description) {
+    try {
+        const newYearRef = ref(db, 'years/' + Date.now());
+        await set(newYearRef, {
+            year: year,
+            description: description,
+            userName: sessionStorage.getItem('userName'),
+            timestamp: Date.now() // Add timestamp
+        });
+        
+        showNotification('Entry added successfully');
+        loadYears();
+    } catch (error) {
+        console.error('Error adding year:', error);
+        showNotification('Error adding entry', 'error');
+    }
+} 
