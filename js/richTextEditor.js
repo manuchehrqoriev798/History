@@ -27,7 +27,6 @@ export function initializeRichTextEditor(textareaId) {
         const content = editableDiv.innerHTML;
         originalTextarea.value = content;
         localStorage.setItem(`editor_${textareaId}`, content);
-        originalTextarea.dispatchEvent(new Event('input', { bubbles: true }));
     };
 
     // Initialize content from localStorage or textarea
@@ -43,30 +42,20 @@ export function initializeRichTextEditor(textareaId) {
 
     // Handle form submission
     if (originalTextarea.form) {
-        originalTextarea.form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            updateContent(); // Ensure latest content is saved
+        const form = originalTextarea.form;
+        form.addEventListener('submit', (e) => {
+            // Update content one final time before submission
+            updateContent();
             
-            try {
-                // Let the form's normal submit handler process
-                const formData = new FormData(originalTextarea.form);
-                const yearInput = formData.get('yearInput');
-                const description = formData.get('descriptionInput');
-
-                // Store the content before submission
-                const contentBeforeSubmit = editableDiv.innerHTML;
-                
-                // Dispatch the submit event
-                await originalTextarea.form.dispatchEvent(new Event('submit', { cancelable: true }));
-                
-                // After successful submission, restore the content
+            // Store the content for restoration after submission
+            const contentBeforeSubmit = editableDiv.innerHTML;
+            
+            // After a successful submission
+            setTimeout(() => {
                 editableDiv.innerHTML = contentBeforeSubmit;
                 originalTextarea.value = contentBeforeSubmit;
                 localStorage.setItem(`editor_${textareaId}`, contentBeforeSubmit);
-                
-            } catch (error) {
-                console.error('Form submission error:', error);
-            }
+            }, 0);
         });
     }
 
