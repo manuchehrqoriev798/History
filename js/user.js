@@ -146,7 +146,7 @@ function displayCurrentEntry(data) {
     `;
 }
 
-// Update the form submission handler to use the new notification
+// Update the form submission handler
 document.getElementById('yearForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     
@@ -162,13 +162,15 @@ document.getElementById('yearForm').addEventListener('submit', async (e) => {
     }
     
     try {
+        const timestamp = new Date().toISOString();
+        
         // Save to user's personal entries
         const userEntryRef = ref(db, `users/${uid}/entries`);
         await set(userEntryRef, {
             year: year,
             description: description,
             userName: userName,
-            lastUpdated: new Date().toISOString()
+            lastUpdated: timestamp
         });
 
         // Also save to years collection for public display
@@ -177,7 +179,7 @@ document.getElementById('yearForm').addEventListener('submit', async (e) => {
             year: year,
             description: description,
             userName: userName,
-            lastUpdated: new Date().toISOString()
+            lastUpdated: timestamp
         });
 
         // Also save to userEntries for public display
@@ -186,7 +188,7 @@ document.getElementById('yearForm').addEventListener('submit', async (e) => {
             year: year,
             description: description,
             userName: userName,
-            lastUpdated: new Date().toISOString()
+            lastUpdated: timestamp
         });
         
         // Update the editable div content after successful save
