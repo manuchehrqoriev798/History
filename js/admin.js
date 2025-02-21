@@ -98,9 +98,9 @@ function createYearElement(yearId, yearData) {
         </div>
         <p class="year-author">Added by: ${yearData.userName || 'Admin'}</p>
         <div class="year-content">
-            <p class="description-text">${yearData.description}</p>
+            <div class="description-text">${yearData.description || ''}</div>
             <div class="edit-form" style="display: none;">
-                <textarea class="edit-description">${yearData.description}</textarea>
+                <textarea class="edit-description">${yearData.description || ''}</textarea>
                 <div class="edit-buttons">
                     <button class="save-edit-btn">Save</button>
                     <button class="cancel-edit-btn">Cancel</button>
@@ -121,25 +121,35 @@ function createYearElement(yearId, yearData) {
     editBtn.addEventListener('click', () => {
         descriptionText.style.display = 'none';
         editForm.style.display = 'block';
+        editTextarea.value = yearData.description || '';
         editTextarea.focus();
     });
 
     cancelEditBtn.addEventListener('click', () => {
         descriptionText.style.display = 'block';
         editForm.style.display = 'none';
-        editTextarea.value = yearData.description;
+        editTextarea.value = yearData.description || '';
     });
 
     saveEditBtn.addEventListener('click', async () => {
         try {
             const yearRef = ref(db, 'years/' + yearId);
-            await set(yearRef, {
+            const updatedData = {
                 year: yearData.year,
                 description: editTextarea.value,
-                userName: 'admin'
-            });
+                userName: yearData.userName || 'Admin'
+            };
+            await set(yearRef, updatedData);
+            
+            // Update the visible text and yearData
+            descriptionText.innerHTML = editTextarea.value;
+            yearData.description = editTextarea.value;
+            
+            // Hide edit form
+            descriptionText.style.display = 'block';
+            editForm.style.display = 'none';
+            
             showNotification('Entry updated successfully');
-            loadYears();
         } catch (error) {
             console.error('Error editing year:', error);
             showNotification('Error updating entry', 'error');
