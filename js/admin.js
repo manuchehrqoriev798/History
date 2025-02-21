@@ -65,9 +65,16 @@ async function loadYears() {
             
             yearsArray.sort((a, b) => b.year - a.year);
             
+            // Update the editable content with the most recent entry
+            if (yearsArray.length > 0) {
+                const descriptionInput = document.getElementById('descriptionInput');
+                if (descriptionInput) {
+                    descriptionInput.innerHTML = yearsArray[0].description || '';
+                }
+            }
+            
             yearsArray.forEach((yearData, index) => {
                 const yearElement = createYearElement(yearData.id, yearData);
-                // Add staggered animation delay
                 yearElement.style.animation = `fadeIn 0.3s ease-out ${index * 0.1}s`;
                 yearElement.style.opacity = '0';
                 yearElement.style.animationFillMode = 'forwards';
@@ -200,16 +207,28 @@ document.getElementById('addYearForm').addEventListener('submit', async (e) => {
     
     try {
         const newYearRef = ref(db, 'years/' + Date.now());
-        await set(newYearRef, {
+        const yearData = {
             year: year,
             description: description,
-            userName: 'admin'
-        });
+            userName: sessionStorage.getItem('userName') || 'admin'
+        };
         
+        await set(newYearRef, yearData);
+        
+        // Clear form
         document.getElementById('yearInput').value = '';
         document.getElementById('descriptionInput').value = '';
+        
         showNotification('Entry added successfully');
-        loadYears();
+        
+        // Reload years to show new entry
+        await loadYears();
+        
+        // Update the editable content with the new entry
+        const descriptionInput = document.getElementById('descriptionInput');
+        if (descriptionInput) {
+            descriptionInput.innerHTML = description;
+        }
     } catch (error) {
         console.error('Error adding year:', error);
         showNotification('Error adding entry', 'error');
@@ -226,4 +245,19 @@ document.getElementById('logoutBtn').addEventListener('click', () => {
 document.addEventListener('DOMContentLoaded', () => {
     initializeRichTextEditor('descriptionInput');
     loadYears();
+    
+    // Add event listener for description input changes
+    const descriptionInput = document.getElementById('descriptionInput');
+    if (descriptionInput) {
+        descriptionInput.addEventListener('input', () => {
+            // Save content to localStorage as backup
+            localStorage.setItem('lastDescription', descriptionInput.innerHTML);
+        });
+        
+        // Restore content from localStorage if available
+        const lastDescription = localStorage.getItem('lastDescription');
+        if (lastDescription) {
+            descriptionInput.innerHTML = lastDescription;
+        }
+    }
 }); 
