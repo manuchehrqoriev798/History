@@ -115,8 +115,18 @@ document.getElementById('yearForm').addEventListener('submit', async (e) => {
     }
     
     try {
+        // Save to user's personal entries
         const userEntryRef = ref(db, `users/${uid}/entries`);
         await set(userEntryRef, {
+            year: year,
+            description: description,
+            userName: userName,
+            lastUpdated: new Date().toISOString()
+        });
+
+        // Also save to userEntries for public display
+        const publicEntryRef = ref(db, `userEntries/${uid}`);
+        await set(publicEntryRef, {
             year: year,
             description: description,
             userName: userName,
