@@ -97,6 +97,7 @@ async function loadUserEntry() {
         const uid = auth.currentUser?.uid;
         if (!uid) return;
 
+        // Get user's personal entry from their specific path
         const userEntryRef = ref(db, `users/${uid}/entries`);
         const snapshot = await get(userEntryRef);
 
@@ -126,6 +127,15 @@ async function loadUserEntry() {
                 <h3>Your Entry</h3>
                 <p class="no-entry-message">You haven't created an entry yet. Use the form above to add your historical entry.</p>
             `;
+            
+            // Clear the form and editable div
+            document.getElementById('yearInput').value = '';
+            const descriptionInput = document.getElementById('descriptionInput');
+            descriptionInput.value = '';
+            const editableDiv = descriptionInput.previousSibling;
+            if (editableDiv && editableDiv.className === 'editable-content') {
+                editableDiv.innerHTML = '';
+            }
         }
     } catch (error) {
         console.error('Error loading user entry:', error);
@@ -207,7 +217,7 @@ document.getElementById('yearForm').addEventListener('submit', async (e) => {
         `;
         
         // Store in localStorage
-        localStorage.setItem(`editor_descriptionInput`, description);
+        localStorage.setItem(`editor_${uid}_descriptionInput`, description);
         
         showNotification('Entry saved successfully! 🎉');
     } catch (error) {
@@ -228,54 +238,17 @@ document.getElementById('logoutBtn').addEventListener('click', async () => {
 });
 
 // Initialize
-auth.onAuthStateChanged((user) => {
-    if (user) {
-        loadUserEntry();
-    } else {
-        window.location.href = 'login.html';
-    }
-});
-
-
-// Initialize the page
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', () => {
     initializeRichTextEditor('descriptionInput');
     
-    // Load user's last entry
-    try {
-        const userEntriesRef = ref(db, 'userEntries');
-        const snapshot = await get(userEntriesRef);
-        
-        if (snapshot.exists()) {
-            let lastEntry = null;
-            let latestTimestamp = 0;
-            
-            snapshot.forEach((childSnapshot) => {
-                const entry = childSnapshot.val();
-                if (entry.userName === userName && entry.timestamp > latestTimestamp) {
-                    lastEntry = entry;
-                    latestTimestamp = entry.timestamp;
-                }
-            });
-            
-            if (lastEntry) {
-                // Set the content in both the textarea and editable div
-                const descriptionInput = document.getElementById('descriptionInput');
-                const editableDiv = descriptionInput.previousSibling;
-                
-                descriptionInput.value = lastEntry.description;
-                editableDiv.innerHTML = lastEntry.description;
-                
-                // Set the year if it exists
-                const yearInput = document.getElementById('yearInput');
-                if (yearInput && lastEntry.year) {
-                    yearInput.value = lastEntry.year;
-                }
-            }
+    auth.onAuthStateChanged((user) => {
+        if (user) {
+            // Load the user's personal entry
+            loadUserEntry();
+        } else {
+            window.location.href = 'login.html';
         }
-    } catch (error) {
-        console.error('Error loading user\'s last entry:', error);
-    }
+    });
 });
 
 // Modify the loadYears function to prevent duplicates
