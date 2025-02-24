@@ -105,28 +105,41 @@ async function deleteYear(yearId) {
         }
 
         const yearData = yearSnapshot.val();
-        const userId = yearData.userId; // Get the associated userId if it exists
+        const userId = yearData.userId;
+
+        if (!userId) {
+            // If no userId, just delete from years collection
+            await remove(yearRef);
+            showNotification('Entry deleted from years collection');
+            await loadYears();
+            return;
+        }
+
+        // Check if entry exists in userEntries
+        const userEntryRef = ref(db, `userEntries/${userId}`);
+        const userEntrySnapshot = await get(userEntryRef);
 
         const deletionPromises = [];
 
-        // 1. Delete from years collection
+        // Delete from years collection
         deletionPromises.push(remove(yearRef));
 
-        // 2. Delete from userEntries collection
-        // Note: We're now deleting directly from userEntries using yearId
-        const userEntryRef = ref(db, `userEntries/${yearId}`);
-        deletionPromises.push(remove(userEntryRef));
+        // Delete from userEntries if it exists
+        if (userEntrySnapshot.exists()) {
+            deletionPromises.push(remove(userEntryRef));
+        }
 
-        // 3. If there's a userId, also delete from user's personal entries
-        if (userId) {
-            const userPersonalEntryRef = ref(db, `users/${userId}/entries/${yearId}`);
+        // Delete from user's personal entries if they exist
+        const userPersonalEntryRef = ref(db, `users/${userId}/entries`);
+        const personalEntrySnapshot = await get(userPersonalEntryRef);
+        if (personalEntrySnapshot.exists()) {
             deletionPromises.push(remove(userPersonalEntryRef));
         }
 
         // Execute all deletions
         await Promise.all(deletionPromises);
         
-        showNotification('Entry deleted successfully');
+        showNotification(`Entry successfully deleted from all collections`);
         
         // Refresh the views
         await loadYears();
