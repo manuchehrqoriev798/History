@@ -83,111 +83,56 @@ async function loadYears() {
     }
 }
 
-// Create year element with inline edit functionality
-function createYearElement(yearId, yearData) {
-    const yearDiv = document.createElement('div');
-    yearDiv.className = 'year-item content-loading';
+// Completely rewritten deletion logic
+async function deleteYear(yearId) {
+    if (sessionStorage.getItem('userRole') !== 'admin') {
+        showNotification('Unauthorized: Admin privileges required', 'error');
+        return;
+    }
     
-    yearDiv.innerHTML = `
-        <div class="year-header">
-            <h3>${yearData.year}</h3>
-            <div class="year-controls">
-                <button class="edit-btn" data-id="${yearId}">Edit</button>
-                <button class="delete-btn" data-id="${yearId}">Delete</button>
-            </div>
-        </div>
-        <p class="year-author">Added by: ${yearData.userName || 'Admin'}</p>
-        <div class="year-content">
-            <p class="description-text">${yearData.description}</p>
-            <div class="edit-form" style="display: none;">
-                <textarea class="edit-description">${yearData.description}</textarea>
-                <div class="edit-buttons">
-                    <button class="save-edit-btn">Save</button>
-                    <button class="cancel-edit-btn">Cancel</button>
-                </div>
-            </div>
-        </div>
-    `;
+    if (!confirm('Are you sure you want to delete this entry?')) {
+        return;
+    }
 
-    // Add edit functionality
-    const editBtn = yearDiv.querySelector('.edit-btn');
-    const deleteBtn = yearDiv.querySelector('.delete-btn');
-    const descriptionText = yearDiv.querySelector('.description-text');
-    const editForm = yearDiv.querySelector('.edit-form');
-    const editTextarea = yearDiv.querySelector('.edit-description');
-    const saveEditBtn = yearDiv.querySelector('.save-edit-btn');
-    const cancelEditBtn = yearDiv.querySelector('.cancel-edit-btn');
-
-    editBtn.addEventListener('click', () => {
-        descriptionText.style.display = 'none';
-        editForm.style.display = 'block';
-        editTextarea.value = yearData.description;
-        const editableDiv = editTextarea.previousSibling;
-        editableDiv.innerHTML = yearData.description;
-        editTextarea.focus();
-    });
-
-    cancelEditBtn.addEventListener('click', () => {
-        descriptionText.style.display = 'block';
-        editForm.style.display = 'none';
-        editTextarea.value = yearData.description;
-    });
-
-    saveEditBtn.addEventListener('click', async () => {
-        try {
-            const yearRef = ref(db, 'years/' + yearId);
-            await set(yearRef, {
-                year: yearData.year,
-                description: editTextarea.value,
-                userName: 'admin'
-            });
-            showNotification('Entry updated successfully');
-            loadYears();
-        } catch (error) {
-            console.error('Error editing year:', error);
-            showNotification('Error updating entry', 'error');
+    try {
+        // Get the year data first to find associated user
+        const yearRef = ref(db, `years/${yearId}`);
+        const yearSnapshot = await get(yearRef);
+        
+        if (!yearSnapshot.exists()) {
+            showNotification('Entry not found', 'error');
+            return;
         }
-    });
 
-    deleteBtn.addEventListener('click', () => {
-        deleteYear(yearId);
-    });
-    
-    return yearDiv;
-}
+        const yearData = yearSnapshot.val();
+        const userId = yearData.userId; // Get the associated userId if it exists
 
-// Update the deleteYear function to handle both collections
-async function deleteYear(docId) {
-    if (sessionStorage.getItem('userRole') !== 'admin') return;
-    
-    if (confirm('Are you sure you want to delete this year?')) {
-        try {
-            const deletionPromises = [];
+        const deletionPromises = [];
+
+        // 1. Delete from years collection
+        deletionPromises.push(remove(yearRef));
+
+        // 2. If there's a userId, delete from userEntries
+        if (userId) {
+            const userEntryRef = ref(db, `userEntries/${userId}/${yearId}`);
+            deletionPromises.push(remove(userEntryRef));
             
-            // Delete from years collection
-            const yearRef = ref(db, `years/${docId}`);
-            const yearSnapshot = await get(yearRef);
-            if (yearSnapshot.exists()) {
-                deletionPromises.push(remove(yearRef));
-            }
-            
-            // Delete from userEntries collection
-            const userEntriesRef = ref(db, `userEntries/${docId}`);
-            const userEntriesSnapshot = await get(userEntriesRef);
-            if (userEntriesSnapshot.exists()) {
-                deletionPromises.push(remove(userEntriesRef));
-            }
-            
-            // Execute all deletions
-            await Promise.all(deletionPromises);
-            
-            showNotification('Entry deleted successfully');
-            loadYears(); // Refresh the admin view
-            
-        } catch (error) {
-            console.error('Error deleting year:', error);
-            showNotification('Error deleting entry', 'error');
+            // Also delete from user's personal entries
+            const userPersonalEntryRef = ref(db, `users/${userId}/entries/${yearId}`);
+            deletionPromises.push(remove(userPersonalEntryRef));
         }
+
+        // Execute all deletions
+        await Promise.all(deletionPromises);
+        
+        showNotification('Entry deleted successfully');
+        
+        // Refresh the views
+        await loadYears();
+
+    } catch (error) {
+        console.error('Error deleting entry:', error);
+        showNotification('Error deleting entry: ' + error.message, 'error');
     }
 }
 
@@ -234,41 +179,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Update the deleteUser function to handle all user data
 async function deleteUser(userId) {
+    if (sessionStorage.getItem('userRole') !== 'admin') {
+        showNotification('Unauthorized: Admin privileges required', 'error');
+        return;
+    }
+
     if (!confirm('Are you sure you want to delete this user and all their entries?')) {
         return;
     }
 
     try {
-        // First, verify admin status
-        if (sessionStorage.getItem('userRole') !== 'admin') {
-            throw new Error('Unauthorized: Admin privileges required');
-        }
-
         const deletionPromises = [];
 
-        // Delete from years collection where userId matches
+        // 1. Get all user's entries from years collection
         const yearsRef = ref(db, 'years');
         const yearsQuery = query(yearsRef, orderByChild('userId'), equalTo(userId));
         const yearsSnapshot = await get(yearsQuery);
-        
+
         if (yearsSnapshot.exists()) {
             yearsSnapshot.forEach((yearSnapshot) => {
-                deletionPromises.push(remove(ref(db, `years/${yearSnapshot.key}`)));
+                const yearRef = ref(db, `years/${yearSnapshot.key}`);
+                deletionPromises.push(remove(yearRef));
             });
         }
 
-        // Delete from userEntries collection
+        // 2. Delete all user's entries from userEntries collection
         const userEntriesRef = ref(db, `userEntries/${userId}`);
-        const userEntriesSnapshot = await get(userEntriesRef);
-        if (userEntriesSnapshot.exists()) {
-            deletionPromises.push(remove(userEntriesRef));
-        }
+        deletionPromises.push(remove(userEntriesRef));
 
-        // Delete user's personal entries
+        // 3. Delete user's personal entries
         const userPersonalEntriesRef = ref(db, `users/${userId}/entries`);
         deletionPromises.push(remove(userPersonalEntriesRef));
 
-        // Delete the user account
+        // 4. Delete the user account itself
         const userRef = ref(db, `users/${userId}`);
         deletionPromises.push(remove(userRef));
 
@@ -277,14 +220,86 @@ async function deleteUser(userId) {
 
         showNotification('User and all associated entries deleted successfully');
         
-        // Refresh the views
-        loadYears();
-        if (typeof loadUsers === 'function') {
-            loadUsers();
-        }
+        // Refresh all relevant views
+        await Promise.all([
+            loadYears(),
+            typeof loadUsers === 'function' ? loadUsers() : Promise.resolve()
+        ]);
 
     } catch (error) {
         console.error('Error deleting user:', error);
-        showNotification(`Error deleting user: ${error.message}`, 'error');
+        showNotification('Error deleting user: ' + error.message, 'error');
     }
+}
+
+// Helper function to create year element
+function createYearElement(yearId, yearData) {
+    const yearDiv = document.createElement('div');
+    yearDiv.className = 'year-item content-loading';
+    
+    yearDiv.innerHTML = `
+        <div class="year-header">
+            <h3>${yearData.year}</h3>
+            <div class="year-controls">
+                <button class="edit-btn" data-id="${yearId}">Edit</button>
+                <button class="delete-btn" data-id="${yearId}">Delete</button>
+            </div>
+        </div>
+        <p class="year-author">Added by: ${yearData.userName || 'Admin'}</p>
+        <div class="year-content">
+            <p class="description-text">${yearData.description}</p>
+            <div class="edit-form" style="display: none;">
+                <textarea class="edit-description">${yearData.description}</textarea>
+                <div class="edit-buttons">
+                    <button class="save-edit-btn">Save</button>
+                    <button class="cancel-edit-btn">Cancel</button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Add delete functionality
+    const deleteBtn = yearDiv.querySelector('.delete-btn');
+    deleteBtn.addEventListener('click', () => deleteYear(yearId));
+
+    // Add edit functionality
+    const editBtn = yearDiv.querySelector('.edit-btn');
+    const descriptionText = yearDiv.querySelector('.description-text');
+    const editForm = yearDiv.querySelector('.edit-form');
+    const editTextarea = yearDiv.querySelector('.edit-description');
+    const saveEditBtn = yearDiv.querySelector('.save-edit-btn');
+    const cancelEditBtn = yearDiv.querySelector('.cancel-edit-btn');
+
+    editBtn.addEventListener('click', () => {
+        descriptionText.style.display = 'none';
+        editForm.style.display = 'block';
+        editTextarea.value = yearData.description;
+        const editableDiv = editTextarea.previousSibling;
+        editableDiv.innerHTML = yearData.description;
+        editTextarea.focus();
+    });
+
+    cancelEditBtn.addEventListener('click', () => {
+        descriptionText.style.display = 'block';
+        editForm.style.display = 'none';
+        editTextarea.value = yearData.description;
+    });
+
+    saveEditBtn.addEventListener('click', async () => {
+        try {
+            const yearRef = ref(db, 'years/' + yearId);
+            await set(yearRef, {
+                year: yearData.year,
+                description: editTextarea.value,
+                userName: 'admin'
+            });
+            showNotification('Entry updated successfully');
+            loadYears();
+        } catch (error) {
+            console.error('Error editing year:', error);
+            showNotification('Error updating entry', 'error');
+        }
+    });
+    
+    return yearDiv;
 } 
