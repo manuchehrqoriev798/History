@@ -162,29 +162,20 @@ async function deleteYear(docId) {
     
     if (confirm('Are you sure you want to delete this year?')) {
         try {
-            // First, check if it exists in years collection
-            const yearRef = ref(db, `years/${docId}`);
-            const yearSnapshot = await get(yearRef);
-            
-            // Then check userEntries collection
-            const userEntriesRef = ref(db, 'userEntries');
-            const userEntriesSnapshot = await get(userEntriesRef);
-            
             const deletionPromises = [];
             
-            // If it exists in years collection, delete it
+            // Delete from years collection
+            const yearRef = ref(db, `years/${docId}`);
+            const yearSnapshot = await get(yearRef);
             if (yearSnapshot.exists()) {
                 deletionPromises.push(remove(yearRef));
             }
             
-            // Search through userEntries to find matching entries
+            // Delete from userEntries collection
+            const userEntriesRef = ref(db, `userEntries/${docId}`);
+            const userEntriesSnapshot = await get(userEntriesRef);
             if (userEntriesSnapshot.exists()) {
-                userEntriesSnapshot.forEach((userEntry) => {
-                    if (userEntry.key === docId) {
-                        const userEntryRef = ref(db, `userEntries/${userEntry.key}`);
-                        deletionPromises.push(remove(userEntryRef));
-                    }
-                });
+                deletionPromises.push(remove(userEntriesRef));
             }
             
             // Execute all deletions
@@ -241,7 +232,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadYears();
 });
 
-// Delete user and their entries
+// Update the deleteUser function to handle all user data
 async function deleteUser(userId) {
     if (!confirm('Are you sure you want to delete this user and all their entries?')) {
         return;
@@ -249,12 +240,11 @@ async function deleteUser(userId) {
 
     try {
         // First, verify admin status
-        const adminRef = ref(db, `users/${auth.currentUser.uid}`);
-        const adminSnapshot = await get(adminRef);
-        
-        if (!adminSnapshot.exists() || adminSnapshot.val().role !== 'admin') {
+        if (sessionStorage.getItem('userRole') !== 'admin') {
             throw new Error('Unauthorized: Admin privileges required');
         }
+
+        const deletionPromises = [];
 
         // Delete from years collection where userId matches
         const yearsRef = ref(db, 'years');
@@ -262,26 +252,37 @@ async function deleteUser(userId) {
         const yearsSnapshot = await get(yearsQuery);
         
         if (yearsSnapshot.exists()) {
-            const yearDeletions = Object.keys(yearsSnapshot.val()).map(yearKey => 
-                remove(ref(db, `years/${yearKey}`))
-            );
-            await Promise.all(yearDeletions);
+            yearsSnapshot.forEach((yearSnapshot) => {
+                deletionPromises.push(remove(ref(db, `years/${yearSnapshot.key}`)));
+            });
         }
 
-        // Delete from userEntries
-        await remove(ref(db, `userEntries/${userId}`));
+        // Delete from userEntries collection
+        const userEntriesRef = ref(db, `userEntries/${userId}`);
+        const userEntriesSnapshot = await get(userEntriesRef);
+        if (userEntriesSnapshot.exists()) {
+            deletionPromises.push(remove(userEntriesRef));
+        }
 
-        // Delete user's entries
-        await remove(ref(db, `users/${userId}/entries`));
+        // Delete user's personal entries
+        const userPersonalEntriesRef = ref(db, `users/${userId}/entries`);
+        deletionPromises.push(remove(userPersonalEntriesRef));
 
-        // Finally, delete the user
-        await remove(ref(db, `users/${userId}`));
+        // Delete the user account
+        const userRef = ref(db, `users/${userId}`);
+        deletionPromises.push(remove(userRef));
+
+        // Execute all deletions
+        await Promise.all(deletionPromises);
 
         showNotification('User and all associated entries deleted successfully');
         
         // Refresh the views
-        loadUsers();
         loadYears();
+        if (typeof loadUsers === 'function') {
+            loadUsers();
+        }
+
     } catch (error) {
         console.error('Error deleting user:', error);
         showNotification(`Error deleting user: ${error.message}`, 'error');
