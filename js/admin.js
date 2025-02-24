@@ -162,15 +162,33 @@ async function deleteYear(docId) {
     
     if (confirm('Are you sure you want to delete this year?')) {
         try {
-            // Delete from both collections
+            // First, check if it exists in years collection
             const yearRef = ref(db, `years/${docId}`);
-            const userEntriesRef = ref(db, `userEntries/${docId}`);
+            const yearSnapshot = await get(yearRef);
             
-            // Use Promise.all to delete from both locations
-            await Promise.all([
-                remove(yearRef),
-                remove(userEntriesRef)
-            ]);
+            // Then check userEntries collection
+            const userEntriesRef = ref(db, 'userEntries');
+            const userEntriesSnapshot = await get(userEntriesRef);
+            
+            const deletionPromises = [];
+            
+            // If it exists in years collection, delete it
+            if (yearSnapshot.exists()) {
+                deletionPromises.push(remove(yearRef));
+            }
+            
+            // Search through userEntries to find matching entries
+            if (userEntriesSnapshot.exists()) {
+                userEntriesSnapshot.forEach((userEntry) => {
+                    if (userEntry.key === docId) {
+                        const userEntryRef = ref(db, `userEntries/${userEntry.key}`);
+                        deletionPromises.push(remove(userEntryRef));
+                    }
+                });
+            }
+            
+            // Execute all deletions
+            await Promise.all(deletionPromises);
             
             showNotification('Entry deleted successfully');
             loadYears(); // Refresh the admin view
