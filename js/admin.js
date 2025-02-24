@@ -112,12 +112,13 @@ async function deleteYear(yearId) {
         // 1. Delete from years collection
         deletionPromises.push(remove(yearRef));
 
-        // 2. If there's a userId, delete from userEntries
+        // 2. Delete from userEntries collection
+        // Note: We're now deleting directly from userEntries using yearId
+        const userEntryRef = ref(db, `userEntries/${yearId}`);
+        deletionPromises.push(remove(userEntryRef));
+
+        // 3. If there's a userId, also delete from user's personal entries
         if (userId) {
-            const userEntryRef = ref(db, `userEntries/${userId}/${yearId}`);
-            deletionPromises.push(remove(userEntryRef));
-            
-            // Also delete from user's personal entries
             const userPersonalEntryRef = ref(db, `users/${userId}/entries/${yearId}`);
             deletionPromises.push(remove(userPersonalEntryRef));
         }
@@ -198,20 +199,21 @@ async function deleteUser(userId) {
 
         if (yearsSnapshot.exists()) {
             yearsSnapshot.forEach((yearSnapshot) => {
+                // Delete from years
                 const yearRef = ref(db, `years/${yearSnapshot.key}`);
                 deletionPromises.push(remove(yearRef));
+                
+                // Delete corresponding entry from userEntries
+                const userEntryRef = ref(db, `userEntries/${yearSnapshot.key}`);
+                deletionPromises.push(remove(userEntryRef));
             });
         }
 
-        // 2. Delete all user's entries from userEntries collection
-        const userEntriesRef = ref(db, `userEntries/${userId}`);
-        deletionPromises.push(remove(userEntriesRef));
-
-        // 3. Delete user's personal entries
+        // 2. Delete user's personal entries
         const userPersonalEntriesRef = ref(db, `users/${userId}/entries`);
         deletionPromises.push(remove(userPersonalEntriesRef));
 
-        // 4. Delete the user account itself
+        // 3. Delete the user account itself
         const userRef = ref(db, `users/${userId}`);
         deletionPromises.push(remove(userRef));
 
