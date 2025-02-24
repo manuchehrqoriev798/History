@@ -83,16 +83,57 @@ async function loadYears() {
     }
 }
 
-// Completely rewritten deletion logic
+// Custom confirm dialog function
+function showConfirmDialog(message) {
+    return new Promise((resolve) => {
+        const dialog = document.createElement('div');
+        dialog.className = 'confirm-dialog';
+        dialog.innerHTML = `
+            <div class="confirm-content paper-effect">
+                <h3>Confirm Deletion</h3>
+                <p>${message}</p>
+                <div class="confirm-buttons">
+                    <button class="confirm-yes">Yes, Delete</button>
+                    <button class="confirm-no">Cancel</button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(dialog);
+
+        const yesBtn = dialog.querySelector('.confirm-yes');
+        const noBtn = dialog.querySelector('.confirm-no');
+
+        yesBtn.addEventListener('click', () => {
+            dialog.remove();
+            resolve(true);
+        });
+
+        noBtn.addEventListener('click', () => {
+            dialog.remove();
+            resolve(false);
+        });
+
+        // Close on background click
+        dialog.addEventListener('click', (e) => {
+            if (e.target === dialog) {
+                dialog.remove();
+                resolve(false);
+            }
+        });
+    });
+}
+
+// Updated deleteYear function with better confirmation
 async function deleteYear(yearId) {
     if (sessionStorage.getItem('userRole') !== 'admin') {
         showNotification('Unauthorized: Admin privileges required', 'error');
         return;
     }
     
-    if (!confirm('Are you sure you want to delete this entry?')) {
-        return;
-    }
+    const confirmed = await showConfirmDialog('Are you sure you want to delete this historical entry? This action cannot be undone.');
+    
+    if (!confirmed) return;
 
     try {
         // Get the year data first to find associated user
