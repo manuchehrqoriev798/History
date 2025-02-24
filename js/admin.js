@@ -1,5 +1,5 @@
 import { db } from './firebase-config.js';
-import { ref, set, get, remove, query, orderByChild } from 'https://www.gstatic.com/firebasejs/9.1.3/firebase-database.js';
+import { ref, set, get, remove, query, orderByChild, equalTo } from 'https://www.gstatic.com/firebasejs/9.1.3/firebase-database.js';
 import { initializeRichTextEditor } from './richTextEditor.js';
 
 // Check if user is logged in as admin
@@ -248,34 +248,42 @@ async function deleteUser(userId) {
     }
 
     try {
-        // Delete from users collection
-        const userRef = ref(db, `users/${userId}`);
-        await remove(userRef);
-
-        // Delete from userEntries collection
-        const userEntriesRef = ref(db, `userEntries/${userId}`);
-        await remove(userEntriesRef);
-
-        // Delete from years collection where userName matches
-        const yearsRef = ref(db, 'years');
-        const yearsSnapshot = await get(yearsRef);
+        // First, verify admin status
+        const adminRef = ref(db, `users/${auth.currentUser.uid}`);
+        const adminSnapshot = await get(adminRef);
         
-        if (yearsSnapshot.exists()) {
-            const deletionPromises = [];
-            yearsSnapshot.forEach((yearSnapshot) => {
-                const yearData = yearSnapshot.val();
-                if (yearData.userId === userId) {
-                    const yearRef = ref(db, `years/${yearSnapshot.key}`);
-                    deletionPromises.push(remove(yearRef));
-                }
-            });
-            await Promise.all(deletionPromises);
+        if (!adminSnapshot.exists() || adminSnapshot.val().role !== 'admin') {
+            throw new Error('Unauthorized: Admin privileges required');
         }
 
-        showNotification('User and their entries deleted successfully');
-        loadUsers(); // Refresh the users list
+        // Delete from years collection where userId matches
+        const yearsRef = ref(db, 'years');
+        const yearsQuery = query(yearsRef, orderByChild('userId'), equalTo(userId));
+        const yearsSnapshot = await get(yearsQuery);
+        
+        if (yearsSnapshot.exists()) {
+            const yearDeletions = Object.keys(yearsSnapshot.val()).map(yearKey => 
+                remove(ref(db, `years/${yearKey}`))
+            );
+            await Promise.all(yearDeletions);
+        }
+
+        // Delete from userEntries
+        await remove(ref(db, `userEntries/${userId}`));
+
+        // Delete user's entries
+        await remove(ref(db, `users/${userId}/entries`));
+
+        // Finally, delete the user
+        await remove(ref(db, `users/${userId}`));
+
+        showNotification('User and all associated entries deleted successfully');
+        
+        // Refresh the views
+        loadUsers();
+        loadYears();
     } catch (error) {
         console.error('Error deleting user:', error);
-        showNotification('Error deleting user', 'error');
+        showNotification(`Error deleting user: ${error.message}`, 'error');
     }
 } 
