@@ -239,4 +239,43 @@ document.getElementById('logoutBtn').addEventListener('click', () => {
 document.addEventListener('DOMContentLoaded', () => {
     initializeRichTextEditor('descriptionInput');
     loadYears();
-}); 
+});
+
+// Delete user and their entries
+async function deleteUser(userId) {
+    if (!confirm('Are you sure you want to delete this user and all their entries?')) {
+        return;
+    }
+
+    try {
+        // Delete from users collection
+        const userRef = ref(db, `users/${userId}`);
+        await remove(userRef);
+
+        // Delete from userEntries collection
+        const userEntriesRef = ref(db, `userEntries/${userId}`);
+        await remove(userEntriesRef);
+
+        // Delete from years collection where userName matches
+        const yearsRef = ref(db, 'years');
+        const yearsSnapshot = await get(yearsRef);
+        
+        if (yearsSnapshot.exists()) {
+            const deletionPromises = [];
+            yearsSnapshot.forEach((yearSnapshot) => {
+                const yearData = yearSnapshot.val();
+                if (yearData.userId === userId) {
+                    const yearRef = ref(db, `years/${yearSnapshot.key}`);
+                    deletionPromises.push(remove(yearRef));
+                }
+            });
+            await Promise.all(deletionPromises);
+        }
+
+        showNotification('User and their entries deleted successfully');
+        loadUsers(); // Refresh the users list
+    } catch (error) {
+        console.error('Error deleting user:', error);
+        showNotification('Error deleting user', 'error');
+    }
+} 

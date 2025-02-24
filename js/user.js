@@ -177,45 +177,52 @@ document.getElementById('yearForm').addEventListener('submit', async (e) => {
         // Save to user's personal entries
         const userEntryRef = ref(db, `users/${uid}/entries`);
         await set(userEntryRef, {
-            year: year,
-            description: description,
-            userName: userName,
-            lastUpdated: timestamp
+            year,
+            description,
+            timestamp,
+            userName
         });
 
-        // Also save to years collection for public display
-        const yearRef = ref(db, `years/${Date.now()}`);
-        await set(yearRef, {
-            year: year,
-            description: description,
-            userName: userName,
-            lastUpdated: timestamp
+        // Update or create entry in userEntries collection
+        const userEntriesRef = ref(db, `userEntries/${uid}`);
+        await set(userEntriesRef, {
+            year,
+            description,
+            timestamp,
+            userName,
+            userId: uid
         });
 
-        // Also save to userEntries for public display
-        const publicEntryRef = ref(db, `userEntries/${uid}`);
-        await set(publicEntryRef, {
-            year: year,
-            description: description,
-            userName: userName,
-            lastUpdated: timestamp
-        });
-        
-        // Update the editable div content after successful save
-        const editableDiv = descriptionInput.previousSibling;
-        if (editableDiv && editableDiv.className === 'editable-content') {
-            editableDiv.innerHTML = description;
+        // Check if entry exists in years collection
+        const yearsRef = ref(db, 'years');
+        const yearsSnapshot = await get(yearsRef);
+        let existingYearKey = null;
+
+        if (yearsSnapshot.exists()) {
+            yearsSnapshot.forEach((yearSnapshot) => {
+                const yearData = yearSnapshot.val();
+                if (yearData.userId === uid) {
+                    existingYearKey = yearSnapshot.key;
+                }
+            });
         }
-        
+
+        // Update or create entry in years collection
+        const yearRef = ref(db, `years/${existingYearKey || Date.now()}`);
+        await set(yearRef, {
+            year,
+            description,
+            userName,
+            userId: uid,
+            timestamp
+        });
+
         // Update the current entry display
-        currentEntry.innerHTML = `
-            <h3>Your Current Entry</h3>
-            <div class="entry-content">
-                <p><strong>Year:</strong> ${year}</p>
-                <div class="description-content">${description}</div>
-            </div>
-        `;
-        
+        displayCurrentEntry({
+            year,
+            description
+        });
+
         // Store in localStorage
         localStorage.setItem(`editor_${uid}_descriptionInput`, description);
         
