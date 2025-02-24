@@ -150,38 +150,36 @@ function createYearElement(yearId, yearData) {
     });
 
     deleteBtn.addEventListener('click', () => {
-        const confirmDialog = document.createElement('div');
-        confirmDialog.className = 'confirm-dialog';
-        confirmDialog.innerHTML = `
-            <div class="confirm-content">
-                <p>Are you sure you want to delete this entry?</p>
-                <div class="confirm-buttons">
-                    <button class="confirm-yes">Yes, Delete</button>
-                    <button class="confirm-no">Cancel</button>
-                </div>
-            </div>
-        `;
-        document.body.appendChild(confirmDialog);
-
-        confirmDialog.querySelector('.confirm-yes').addEventListener('click', async () => {
-            try {
-                const yearRef = ref(db, 'years/' + yearId);
-                await remove(yearRef);
-                showNotification('Entry deleted successfully');
-                loadYears();
-            } catch (error) {
-                console.error('Error deleting year:', error);
-                showNotification('Error deleting entry', 'error');
-            }
-            confirmDialog.remove();
-        });
-
-        confirmDialog.querySelector('.confirm-no').addEventListener('click', () => {
-            confirmDialog.remove();
-        });
+        deleteYear(yearId);
     });
     
     return yearDiv;
+}
+
+// Update the deleteYear function to handle both collections
+async function deleteYear(docId) {
+    if (sessionStorage.getItem('userRole') !== 'admin') return;
+    
+    if (confirm('Are you sure you want to delete this year?')) {
+        try {
+            // Delete from both collections
+            const yearRef = ref(db, `years/${docId}`);
+            const userEntriesRef = ref(db, `userEntries/${docId}`);
+            
+            // Use Promise.all to delete from both locations
+            await Promise.all([
+                remove(yearRef),
+                remove(userEntriesRef)
+            ]);
+            
+            showNotification('Entry deleted successfully');
+            loadYears(); // Refresh the admin view
+            
+        } catch (error) {
+            console.error('Error deleting year:', error);
+            showNotification('Error deleting entry', 'error');
+        }
+    }
 }
 
 // Add year
