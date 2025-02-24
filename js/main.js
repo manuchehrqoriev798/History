@@ -1,7 +1,7 @@
 // Import Firebase modules
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.1.3/firebase-app.js';
 import { getAuth, signInWithEmailAndPassword, signOut } from 'https://www.gstatic.com/firebasejs/9.1.3/firebase-auth.js';
-import { getFirestore, collection, addDoc, deleteDoc, doc, query, orderBy, getDocs } from 'https://www.gstatic.com/firebasejs/9.1.3/firebase-firestore.js';
+import { getFirestore, collection, addDoc, deleteDoc, doc, query, orderBy, getDocs, get, ref, set } from 'https://www.gstatic.com/firebasejs/9.1.3/firebase-firestore.js';
 
 // Initialize Firebase
 const firebaseConfig = {
@@ -238,11 +238,33 @@ async function deleteYear(docId) {
     
     if (confirm('Are you sure you want to delete this year?')) {
         try {
+            // Get the year data first to find associated userEntry
             const yearRef = doc(db, 'years', docId);
-            await deleteDoc(yearRef);
-            loadYears();
+            const yearSnapshot = await get(yearRef);
+            
+            if (yearSnapshot.exists()) {
+                const yearData = yearSnapshot.data();
+                const userId = yearData.userId;
+
+                // Delete from years collection
+                await deleteDoc(yearRef);
+
+                // If there's an associated userId, delete from userEntries
+                if (userId) {
+                    const userEntryRef = ref(db, `users/${userId}/entries`);
+                    await set(userEntryRef, null);
+                }
+
+                // Also delete from userEntries collection if it exists
+                const userEntriesRef = ref(db, `userEntries/${userId}`);
+                await set(userEntriesRef, null);
+
+                loadYears();
+                showNotification('Entry deleted successfully');
+            }
         } catch (error) {
             console.error('Error deleting year:', error);
+            showNotification('Error deleting entry', 'error');
         }
     }
 }
