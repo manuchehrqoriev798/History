@@ -102,6 +102,8 @@ body {
     padding: 2rem;
     border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    width: 1120px;
+    margin: 0 auto;
 }
 
 .year-content {
@@ -315,5 +317,21 @@ button[type="submit"]:hover {
 }
 
 .year-info {
-    padding: 1rem;
+    padding: 20px;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    overflow-x: hidden;
+}
+
+.year-info h2 {
+    margin-bottom: 1rem;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    overflow-x: hidden;
+}
+
+.year-info p {
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    overflow-x: hidden;
 }
